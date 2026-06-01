@@ -1,0 +1,80 @@
+/* =========================================================================
+   Techordia — ONE effect system ("operating network")
+   Every page uses the same node/edge/motion language; only the LAYOUT mode
+   changes (network, ownership, lanes, layers, timeline, selector, framework).
+   ========================================================================= */
+
+.fx {
+  position: relative; width: 100%; display: block;
+  aspect-ratio: 1 / 1;            /* default; overridden per-mode below */
+  --fx-mx: 0; --fx-my: 0;          /* normalized mouse position, set by JS */
+}
+.fx svg { width: 100%; height: 100%; overflow: visible; display: block; }
+.fx[data-fx="lanes"], .fx[data-fx="timeline"] { aspect-ratio: 16 / 10; }
+.fx[data-fx="selector"], .fx[data-fx="framework"] { aspect-ratio: 1 / 1; }
+
+/* shared atoms ---------------------------------------------------------- */
+.fx-edge { fill: none; stroke: url(#fxEdge); stroke-width: 1.4; opacity: .5; transition: opacity .3s, stroke-width .3s; }
+.fx-edge--soft { opacity: .28; }
+.fx-flow {
+  fill: none; stroke: url(#fxFlow); stroke-width: 2; stroke-linecap: round;
+  stroke-dasharray: 3 16; opacity: .9; animation: fxflow 2.6s linear infinite;
+}
+@keyframes fxflow { to { stroke-dashoffset: -38; } }
+
+.fx-node { cursor: default; }
+.fx-halo { fill: url(#fxHalo); opacity: .55; transform-box: fill-box; transform-origin: center; }
+.fx-dot { fill: var(--panel-2); stroke: var(--hairline-strong); stroke-width: 1.4; }
+.fx-dot--accent { fill: url(#fxNode); stroke: none; }
+.fx-ring { fill: none; stroke: var(--hairline); stroke-width: 1.2; }
+.fx-glyph { color: #bcd8ff; }
+.fx-hub .fx-dot { fill: url(#fxHub); stroke: none; }
+.fx-label { font-family: var(--font-display); font-weight: 600; fill: #d8e6fb; font-size: 13px; }
+.fx-sub  { font-family: var(--font-body); font-weight: 500; fill: #7f93b0; font-size: 10.5px; letter-spacing: .02em; }
+.fx-cap  { font-family: var(--font-display); font-weight: 600; fill: #9fd9ff; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; }
+
+/* ambient bob (per-node duration/delay set inline by JS) */
+.fx-bob { animation: fxbob var(--dur, 7s) ease-in-out var(--del, 0s) infinite; transform-box: view-box; }
+@keyframes fxbob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(var(--amp, -6px)); } }
+
+/* hover emphasis */
+.fx-node.is-hot .fx-dot { stroke: #6fe3da; stroke-width: 2; }
+.fx-node.is-hot .fx-halo { opacity: 1; }
+.fx-node.is-hot .fx-label { fill: #fff; }
+.fx-edge.is-hot { opacity: 1; stroke-width: 2.4; }
+.fx.is-engaged .fx-node:not(.is-hot):not(.fx-hub) { opacity: .42; transition: opacity .3s; }
+.fx.is-engaged .fx-edge:not(.is-hot) { opacity: .12; }
+.fx-node, .fx-edge { transition: opacity .3s; }
+
+/* pulse rings (ownership / layers) */
+.fx-pulse { fill: none; stroke: #2f7bf6; opacity: 0; transform-box: fill-box; transform-origin: center; animation: fxpulse 3.4s ease-out infinite; }
+@keyframes fxpulse { 0% { opacity: .5; transform: scale(.4); } 70% { opacity: 0; transform: scale(1.25); } 100% { opacity: 0; } }
+
+/* radar sweep (cybersecurity) */
+.fx-radar { transform-box: fill-box; transform-origin: center; animation: fxspin 7s linear infinite; }
+@keyframes fxspin { to { transform: rotate(360deg); } }
+.fx-scanline { stroke: #58e0d6; stroke-width: 1; opacity: .5; }
+
+/* lane packets (co-managed) — set path via offset-path inline */
+.fx-packet { fill: #6fe3da; r: 3.2; offset-rotate: 0deg; animation: fxpacket var(--pdur, 4s) linear var(--pdel, 0s) infinite; }
+@keyframes fxpacket { 0% { offset-distance: 0%; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { offset-distance: 100%; opacity: 0; } }
+
+/* timeline progress (projects) */
+.fx-track { stroke: var(--hairline-strong); stroke-width: 3; fill: none; stroke-linecap: round; }
+.fx-progress { stroke: url(#fxFlow); stroke-width: 3; fill: none; stroke-linecap: round; stroke-dasharray: var(--len); stroke-dashoffset: var(--len); animation: fxgrow 5s cubic-bezier(.6,.05,.2,1) infinite; }
+@keyframes fxgrow { 0% { stroke-dashoffset: var(--len); } 60%,100% { stroke-dashoffset: 0; } }
+.fx-runner { fill: #6fe3da; r: 5; animation: fxrun 5s cubic-bezier(.6,.05,.2,1) infinite; }
+
+/* framework rotation (techordia way placeholder) */
+.fx-orbit { transform-box: fill-box; transform-origin: center; animation: fxspin 26s linear infinite; }
+.fx-orbit--rev { animation-duration: 34s; animation-direction: reverse; }
+
+/* badge over placeholder */
+.fx-soon { fill: #0b1626; stroke: var(--hairline-strong); }
+.fx-soon-t { font-family: var(--font-display); font-weight: 600; fill: #9fd9ff; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-flow, .fx-bob, .fx-pulse, .fx-radar, .fx-packet, .fx-progress, .fx-runner, .fx-orbit { animation: none !important; }
+  .fx-progress { stroke-dashoffset: 0; }
+  .fx-flow { opacity: .6; }
+}
