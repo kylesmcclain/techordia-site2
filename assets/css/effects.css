@@ -28,6 +28,7 @@
 .fx-dot--accent { fill: url(#fxNode); stroke: none; }
 .fx-ring { fill: none; stroke: var(--hairline); stroke-width: 1.2; }
 .fx-glyph { color: #bcd8ff; }
+.fx-glyph--hub { color: #eaf6ff; }
 .fx-hub .fx-dot { fill: url(#fxHub); stroke: none; }
 .fx-label { font-family: var(--font-display); font-weight: 600; fill: #d8e6fb; font-size: 13px; }
 .fx-sub  { font-family: var(--font-body); font-weight: 500; fill: #7f93b0; font-size: 10.5px; letter-spacing: .02em; }
@@ -72,6 +73,28 @@
 /* badge over placeholder */
 .fx-soon { fill: #0b1626; stroke: var(--hairline-strong); }
 .fx-soon-t { font-family: var(--font-display); font-weight: 600; fill: #9fd9ff; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+
+[data-theme="light"] .fx-edge { opacity: .62; }
+[data-theme="light"] .fx-edge--soft { opacity: .38; }
+[data-theme="light"] .fx-flow { opacity: .72; }
+[data-theme="light"] .fx-halo { opacity: .32; }
+[data-theme="light"] .fx-dot {
+  fill: rgba(255,255,255,.86);
+  stroke: rgba(47,123,246,.28);
+}
+[data-theme="light"] .fx-dot--accent { fill: url(#fxNode); stroke: none; }
+[data-theme="light"] .fx-ring { stroke: rgba(47,123,246,.22); }
+[data-theme="light"] .fx-glyph { color: #2f7bf6; }
+[data-theme="light"] .fx-glyph--hub { color: #f8fbff; }
+[data-theme="light"] .fx-label { fill: #20334f; }
+[data-theme="light"] .fx-sub { fill: #5f728c; }
+[data-theme="light"] .fx-cap { fill: #166bb8; }
+[data-theme="light"] .fx-node.is-hot .fx-label { fill: #0d1b2e; }
+[data-theme="light"] .fx-soon {
+  fill: rgba(255,255,255,.88);
+  stroke: rgba(47,123,246,.24);
+}
+[data-theme="light"] .fx-soon-t { fill: #166bb8; }
 
 @media (prefers-reduced-motion: reduce) {
   .fx-flow, .fx-bob, .fx-pulse, .fx-radar, .fx-packet, .fx-progress, .fx-runner, .fx-orbit { animation: none !important; }

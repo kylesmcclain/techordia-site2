@@ -63,7 +63,9 @@
     g.appendChild(el("circle", { class: "fx-dot" + (opt.accent || opt.hub ? " fx-dot--accent" : ""), r: r }));
     if (opt.glyph) {
       var ic = document.createElementNS(SVGNS, "path");
-      ic.setAttribute("d", opt.glyph); ic.setAttribute("fill", opt.hub ? "#eaf6ff" : "#bcd8ff");
+      ic.setAttribute("d", opt.glyph);
+      ic.setAttribute("class", "fx-glyph" + (opt.hub ? " fx-glyph--hub" : ""));
+      ic.setAttribute("fill", "currentColor");
       ic.setAttribute("transform", "translate(-12 -12) scale(1)");
       g.appendChild(ic);
     }

@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="assets/css/app.css" />
-<link rel="stylesheet" href="assets/css/effects.css" />
+<link rel="stylesheet" href="assets/css/app.css?v=20260602-1" />
+<link rel="stylesheet" href="assets/css/effects.css?v=20260602-1" />
 </head>
 <body>
 <!-- ================= HEADER ================= -->
@@ -22,7 +22,7 @@
     </div>
   </div>
   <div class="wrap masthead__row">
-    <a class="brand" href="index.html" aria-label="Techordia — home"><img src="assets/img/logo.png" alt="Techordia" /></a>
+    <a class="brand" href="index.html" aria-label="Techordia — home"><img src="assets/img/logo.png?v=20260602-1" alt="Techordia" /></a>
     <nav class="mainnav" aria-label="Primary">
       <a href="index.html" class="is-active">Home</a>
       <div class="navitem">
@@ -70,13 +70,6 @@
     </div>
     <div class="home-hero__fx">
       <div class="fx" data-fx="network" data-label="Techordia at the center of support, Microsoft 365, devices, security, backups, vendors, and projects"></div>
-      <aside class="review-badge review-badge--hero" aria-label="Google review profile status">
-        <div class="review-badge__g">G</div>
-        <span>Google reviews</span>
-        <strong>Google Business Profile</strong>
-        <p>Rating and review count pending verification.</p>
-        <a href="https://www.google.com/search?q=Techordia+Google+reviews" target="_blank" rel="noopener">Open reviews</a>
-      </aside>
     </div>
   </div>
   <div class="wrap hero__stats reveal">
@@ -109,21 +102,83 @@
   </div>
 </section>
 
-<!-- ================= GOOGLE PROOF ================= -->
-<section class="review-proof">
-  <div class="wrap review-proof__inner">
-    <div>
-      <p class="eyebrow">Google reviews</p>
-      <h2>Public feedback should be easy to find and verify.</h2>
-      <p>Jones IT keeps Google proof close to the decision path. Techordia now uses the same placement idea without making unsupported rating claims until the live Business Profile data is verified.</p>
+<!-- ================= GOOGLE REVIEWS ================= -->
+<section class="google-review-section" id="reviews">
+  <div class="wrap">
+    <div class="google-review-head reveal">
+      <h2>What Our Clients Say About Us</h2>
+      <p>Real public feedback from Bay Area businesses that trust Techordia to keep work moving.</p>
     </div>
-    <aside class="review-badge" aria-label="Google review profile status">
-      <div class="review-badge__g">G</div>
-      <span>Google reviews</span>
-      <strong>Google Business Profile</strong>
-      <p>Rating and review count pending verification.</p>
-      <a href="https://www.google.com/search?q=Techordia+Google+reviews" target="_blank" rel="noopener">Open reviews</a>
-    </aside>
+    <div class="google-review-stage reveal" data-review-carousel>
+      <div class="google-summary-bar" aria-label="Techordia Google reviews summary">
+        <div>
+          <div class="google-summary__brand">
+            <span class="google-wordmark" aria-label="Google"><span class="g-blue">G</span><span class="g-red">o</span><span class="g-yellow">o</span><span class="g-blue">g</span><span class="g-green">l</span><span class="g-red">e</span></span>
+            <strong>Reviews</strong>
+          </div>
+          <div class="google-summary__score">
+            <strong>5.0</strong>
+            <span class="google-stars" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></span>
+            <a href="https://www.google.com/search?q=Techordia+Google+reviews#lrd=0x808f8441cadb6e21:0xd0e717094f9fbe09,1,,,," target="_blank" rel="noopener">(1 Google review)</a>
+          </div>
+        </div>
+      </div>
+      <button class="review-arrow review-arrow--prev" type="button" aria-label="Previous reviews"><span aria-hidden="true">&#8249;</span></button>
+      <div class="google-review-track" tabindex="0" aria-label="Techordia review cards">
+        <article class="google-review-card">
+          <div class="google-stars" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+          <p class="google-review-card__quote">Left a 5-star Google rating for Techordia.</p>
+          <a class="google-review-card__more" href="https://www.google.com/search?q=Techordia+Google+reviews#lrd=0x808f8441cadb6e21:0xd0e717094f9fbe09,1,,,," target="_blank" rel="noopener">Read more</a>
+          <div class="google-review-card__author">
+            <span class="review-avatar review-avatar--green">JL<span class="review-avatar__g">G</span></span>
+            <strong>Jasen Lawhorne<span class="review-check" aria-label="Verified source"></span></strong>
+            <small>Google · 5 years ago</small>
+          </div>
+        </article>
+        <article class="google-review-card">
+          <div class="google-stars" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+          <p class="google-review-card__quote">Recovered email access after a days-long lockout and kept legal work moving.</p>
+          <a class="google-review-card__more" href="https://local.yahoo.com/info-169179202-techordia-alameda/" target="_blank" rel="noopener">Read more</a>
+          <div class="google-review-card__author">
+            <span class="review-avatar review-avatar--pink">MG</span>
+            <strong>Marlene G.<span class="review-check" aria-label="Public review source"></span></strong>
+            <small>Public review · Jun 2025</small>
+          </div>
+        </article>
+        <article class="google-review-card">
+          <div class="google-stars" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+          <p class="google-review-card__quote">Nine years of responsive tickets, installations, and steady day-to-day IT support.</p>
+          <a class="google-review-card__more" href="https://local.yahoo.com/info-169179202-techordia-alameda/" target="_blank" rel="noopener">Read more</a>
+          <div class="google-review-card__author">
+            <span class="review-avatar review-avatar--orange">AB</span>
+            <strong>Andy B.<span class="review-check" aria-label="Public review source"></span></strong>
+            <small>Public review · Jun 2024</small>
+          </div>
+        </article>
+        <article class="google-review-card">
+          <div class="google-stars" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+          <p class="google-review-card__quote">More than five years of quick, effective daily IT management and project support.</p>
+          <a class="google-review-card__more" href="https://local.yahoo.com/info-169179202-techordia-alameda/" target="_blank" rel="noopener">Read more</a>
+          <div class="google-review-card__author">
+            <span class="review-avatar review-avatar--purple">KK</span>
+            <strong>Kristin K.<span class="review-check" aria-label="Public review source"></span></strong>
+            <small>Public review · Jul 2023</small>
+          </div>
+        </article>
+        <article class="google-review-card">
+          <div class="google-stars" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+          <p class="google-review-card__quote">Reliable help from Ben and the Techordia team, with service worth recommending.</p>
+          <a class="google-review-card__more" href="https://local.yahoo.com/info-169179202-techordia-alameda/" target="_blank" rel="noopener">Read more</a>
+          <div class="google-review-card__author">
+            <span class="review-avatar review-avatar--blue">KP</span>
+            <strong>Kyle P.<span class="review-check" aria-label="Public review source"></span></strong>
+            <small>Public review · Jul 2023</small>
+          </div>
+        </article>
+      </div>
+      <button class="review-arrow review-arrow--next" type="button" aria-label="Next reviews"><span aria-hidden="true">&#8250;</span></button>
+      <div class="google-review-dots" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    </div>
   </div>
 </section>
 
@@ -180,7 +235,7 @@
   <div class="wrap">
     <div class="foot__top">
       <div>
-        <img src="assets/img/logo.png" alt="Techordia" />
+        <img src="assets/img/logo.png?v=20260602-1" alt="Techordia" />
         <p class="measure">Managed IT, cybersecurity, and strategic guidance for growing small and mid-sized businesses across the San Francisco Bay Area.</p>
       </div>
       <div><h4>Services</h4><ul>
@@ -207,7 +262,7 @@
   </div>
 </footer>
 
-<script src="assets/js/effects.js" defer></script>
-<script src="assets/js/site.js" defer></script>
+<script src="assets/js/effects.js?v=20260602-1" defer></script>
+<script src="assets/js/site.js?v=20260602-1" defer></script>
 </body>
 </html>
