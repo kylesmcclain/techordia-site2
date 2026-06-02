@@ -118,7 +118,7 @@
         if (!reduce) for (var p = 0; p < 2; p++) { var pr = el("circle", { cx: cx, cy: cy, r: 60, class: "fx-pulse" }); pr.style.animationDelay = (p * 1.7) + "s"; svg.appendChild(pr); }
         svg.appendChild(txt(cx, cy - R - 46, "MANAGED BY TECHORDIA", "fx-cap"));
       }
-      var hub = node({ x: cx, y: cy, hub: true, r: 36, glyph: ICON.hub, label: "Techordia", sub: "IT operating center", depth: 1, id: "hub" });
+      var hub = node({ x: cx, y: cy, hub: true, r: 36, glyph: ICON.hub, label: mode === "network" ? "TECHORDIA" : "Techordia", sub: mode === "network" ? "" : "IT operating center", depth: 1, id: "hub" });
       var nodes = [], edges = [];
       for (var i = 0; i < n; i++) {
         var a = start + (i / n) * Math.PI * 2;
