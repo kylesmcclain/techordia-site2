@@ -891,6 +891,22 @@ body.reviews-open {
 .statline .l { font-size: .92rem; color: var(--slate-mute); margin-top: 6px; }
 .dark .statline .l { color: var(--ink-mute); }
 .grad-ink { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero__stats .grad-ink {
+  background: none;
+  color: #8fefff;
+  -webkit-text-fill-color: #8fefff;
+  text-shadow: 0 0 24px rgba(44, 198, 220, .2);
+}
+/* keep the stat numbers readable on the light theme too (cyan-on-light fails) */
+[data-theme="light"] .hero__stats .grad-ink {
+  color: var(--blue-deep);
+  -webkit-text-fill-color: var(--blue-deep);
+  text-shadow: none;
+}
+/* the labels under each stat sit on the dark hero — lift them off the background */
+.hero__stats .statline .l { color: var(--ink-soft); }
+[data-theme="light"] .hero__stats .statline .l { color: var(--slate-soft); }
+.hero__stats .statline .l { color: #9eabc0; }
 
 /* CTA band */
 .band {
@@ -1087,7 +1103,7 @@ body.reviews-open {
   .google-review-track { overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 2px; }
   .google-review-card { flex-basis: 88%; scroll-snap-align: center; }
   .review-arrow { display: none; }
-  .google-float__button { right: 14px; bottom: 88px; width: 132px; min-height: 82px; }
+  .google-float__button { display: none; }
   .google-float__chat { right: 14px; bottom: 18px; width: 54px; height: 54px; }
   .google-review-drawer { top: 38px; right: 10px; bottom: 14px; width: calc(100vw - 20px); }
 }

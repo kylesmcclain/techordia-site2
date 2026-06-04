@@ -11,7 +11,19 @@
 }
 .fx svg { width: 100%; height: 100%; overflow: visible; display: block; }
 .fx[data-fx="lanes"], .fx[data-fx="timeline"] { aspect-ratio: 16 / 10; }
-.fx[data-fx="selector"], .fx[data-fx="framework"] { aspect-ratio: 1 / 1; }
+.fx[data-fx="selector"], .fx[data-fx="framework"], .fx[data-fx="globe"] { aspect-ratio: 1 / 1; }
+
+/* rotating operations globe (canvas) */
+.fx-globe { display: block; width: 100%; height: 100%; }
+
+/* caption that ties the globe to the MSP message */
+.fx-caption {
+  margin: 18px auto 0; max-width: 360px; text-align: center;
+  font-family: var(--font-body); font-size: .92rem; line-height: 1.5; color: var(--ink-soft);
+}
+.fx-caption strong { color: #8fe9ff; font-weight: 600; }
+[data-theme="light"] .fx-caption { color: var(--slate-soft); }
+[data-theme="light"] .fx-caption strong { color: var(--blue-deep); }
 
 /* shared atoms ---------------------------------------------------------- */
 .fx-edge { fill: none; stroke: url(#fxEdge); stroke-width: 1.4; opacity: .5; transition: opacity .3s, stroke-width .3s; }

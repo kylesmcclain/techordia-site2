@@ -1,7 +1,7 @@
 /* =========================================================================
    Techordia effect engine — ONE system, several layout modes.
    Renders inline SVG into [data-fx] containers and wires parallax + hover.
-   Modes: network | ownership | lanes | layers | timeline | selector | framework
+   Modes: globe | network | ownership | lanes | layers | timeline | selector | framework
    ========================================================================= */
 (function () {
   "use strict";
@@ -103,6 +103,8 @@
     var mode = box.getAttribute("data-fx");
     var svg, vb;
     function mk(w, h) { vb = [w, h]; svg = el("svg", { viewBox: "0 0 " + w + " " + h, role: "img", "aria-label": box.getAttribute("data-label") || "Techordia operating network" }); box.appendChild(svg); return svg; }
+
+    if (mode === "globe") { buildGlobe(box); return; }
 
     if (mode === "network" || mode === "ownership") {
       mk(560, 560);
@@ -257,6 +259,153 @@
       badge.appendChild(el("rect", { x: fx2 - 96, y: fy2 + 92, width: 192, height: 40, rx: 12, class: "fx-soon" }));
       badge.appendChild(txt(fx2, fy2 + 117, "FRAMEWORK COMING SOON", "fx-soon-t"));
       svg.appendChild(badge);
+    }
+  }
+
+  /* ---- rotating operations globe (canvas) -------------------------------
+     A Fibonacci-sphere point cloud rotating around its axis: brand blue->teal
+     dots fade with depth, a few surface nodes glow and pulse, and connection
+     arcs trace pings across the surface. Pure original render — no third-party
+     assets. Theme-aware, pointer-reactive, reduced-motion safe.
+     ----------------------------------------------------------------------- */
+  function buildGlobe(box) {
+    var canvas = document.createElement("canvas");
+    canvas.className = "fx-globe";
+    canvas.setAttribute("role", "img");
+    canvas.setAttribute("aria-label", box.getAttribute("data-label") || "Techordia connected operations globe");
+    box.appendChild(canvas);
+    var ctx = canvas.getContext("2d");
+
+    // sphere points (Fibonacci spiral) -----------------------------------
+    var N = 640, pts = [], golden = Math.PI * (3 - Math.sqrt(5));
+    for (var i = 0; i < N; i++) {
+      var uy = 1 - (i / (N - 1)) * 2, rr = Math.sqrt(Math.max(0, 1 - uy * uy)), th = golden * i;
+      pts.push({ x: Math.cos(th) * rr, y: uy, z: Math.sin(th) * rr, lat: (uy + 1) / 2 });
+    }
+    // evenly spread "live" surface nodes + arcs between them
+    var nodes = [], stepN = Math.max(1, Math.floor(N / 9));
+    for (var k = 5; k < N; k += stepN) nodes.push(k);
+    var arcs = [];
+    for (var a = 0; a + 1 < nodes.length; a += 2) arcs.push([nodes[a], nodes[(a + 3) % nodes.length]]);
+
+    var P = {};
+    function setPalette() {
+      var light = document.documentElement.getAttribute("data-theme") === "light";
+      P = light
+        ? { a: [27, 95, 214], b: [16, 165, 158], white: .30, dotMax: .82, glow: "40,150,200", node: "16,150,150", spark: "20,120,140", rim: "30,98,190", haloA: .10 }
+        : { a: [79, 150, 255], b: [40, 214, 205], white: .55, dotMax: 1, glow: "50,165,215", node: "111,227,218", spark: "170,238,255", rim: "120,170,230", haloA: .17 };
+    }
+    setPalette();
+
+    var W = 1, H = 1, cx = 0, cy = 0, R = 0, dpr = 1;
+    function resize() {
+      var r = box.getBoundingClientRect();
+      W = Math.max(1, r.width); H = Math.max(1, r.height);
+      dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      canvas.style.width = W + "px"; canvas.style.height = H + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cx = W / 2; cy = H / 2; R = Math.min(W, H) * 0.40;
+    }
+    resize();
+    if (window.ResizeObserver) { try { new ResizeObserver(resize).observe(box); } catch (e) {} }
+    else window.addEventListener("resize", resize);
+
+    // pointer parallax tilt ----------------------------------------------
+    var tiltX = -0.42, tiltY = 0, curX = -0.42, curY = 0;
+    if (!reduce) {
+      box.addEventListener("pointermove", function (e) {
+        var r = box.getBoundingClientRect();
+        tiltY = ((e.clientX - r.left) / r.width - .5) * 0.55;
+        tiltX = -0.42 + ((e.clientY - r.top) / r.height - .5) * 0.5;
+      });
+      box.addEventListener("pointerleave", function () { tiltX = -0.42; tiltY = 0; });
+    }
+
+    function lerpC(c1, c2, t) { return [c1[0] + (c2[0] - c1[0]) * t, c1[1] + (c2[1] - c1[1]) * t, c1[2] + (c2[2] - c1[2]) * t]; }
+    function rgb(c, al) { return "rgba(" + (c[0] | 0) + "," + (c[1] | 0) + "," + (c[2] | 0) + "," + al + ")"; }
+
+    var ang = 0, proj = new Array(N), order = new Array(N);
+    for (var z = 0; z < N; z++) order[z] = z;
+
+    function draw(now) {
+      ctx.clearRect(0, 0, W, H);
+      // soft halo behind the sphere
+      var halo = ctx.createRadialGradient(cx, cy, R * 0.15, cx, cy, R * 1.55);
+      halo.addColorStop(0, rgb([P.glow.split(",")[0] | 0, P.glow.split(",")[1] | 0, P.glow.split(",")[2] | 0], P.haloA));
+      halo.addColorStop(1, "rgba(" + P.glow + ",0)");
+      ctx.fillStyle = halo; ctx.fillRect(0, 0, W, H);
+      // thin rim
+      ctx.beginPath(); ctx.arc(cx, cy, R * 1.03, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(" + P.rim + ",0.16)"; ctx.lineWidth = 1; ctx.stroke();
+
+      var cosY = Math.cos(ang + curY), sinY = Math.sin(ang + curY);
+      var cosX = Math.cos(curX), sinX = Math.sin(curX);
+      for (var i = 0; i < N; i++) {
+        var p = pts[i];
+        var x1 = p.x * cosY + p.z * sinY, z1 = -p.x * sinY + p.z * cosY;
+        var y2 = p.y * cosX - z1 * sinX, z2 = p.y * sinX + z1 * cosX;
+        proj[i] = { sx: cx + x1 * R, sy: cy - y2 * R, z: z2, lat: p.lat };
+      }
+      order.sort(function (m, n) { return proj[m].z - proj[n].z; });
+
+      // dots (back-to-front)
+      for (var o = 0; o < N; o++) {
+        var pp = proj[order[o]], d = (pp.z + 1) / 2;
+        var col = lerpC(lerpC(P.a, P.b, pp.lat), [255, 255, 255], d * d * P.white);
+        ctx.beginPath();
+        ctx.fillStyle = rgb(col, ((0.10 + 0.62 * d) * P.dotMax).toFixed(3));
+        ctx.arc(pp.sx, pp.sy, 0.8 + 1.7 * d, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // connection arcs + travelling ping
+      for (var aI = 0; aI < arcs.length; aI++) {
+        var p1 = proj[arcs[aI][0]], p2 = proj[arcs[aI][1]];
+        if (p1.z < -0.08 || p2.z < -0.08) continue;
+        var mx = (p1.sx + p2.sx) / 2, my = (p1.sy + p2.sy) / 2;
+        var nx = mx - cx, ny = my - cy, nl = Math.hypot(nx, ny) || 1;
+        var bulge = Math.hypot(p2.sx - p1.sx, p2.sy - p1.sy) * 0.26;
+        var qx = mx + (nx / nl) * bulge, qy = my + (ny / nl) * bulge;
+        ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.quadraticCurveTo(qx, qy, p2.sx, p2.sy);
+        ctx.strokeStyle = "rgba(" + P.node + ",0.26)"; ctx.lineWidth = 1.1; ctx.stroke();
+        if (!reduce) {
+          var tt = (now / 2600 + aI * 0.37) % 1, it = 1 - tt;
+          var bx = it * it * p1.sx + 2 * it * tt * qx + tt * tt * p2.sx;
+          var by = it * it * p1.sy + 2 * it * tt * qy + tt * tt * p2.sy;
+          ctx.beginPath(); ctx.fillStyle = "rgba(" + P.spark + ",0.92)";
+          ctx.arc(bx, by, 1.9, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
+      // glowing surface nodes (front hemisphere)
+      for (var nI = 0; nI < nodes.length; nI++) {
+        var np = proj[nodes[nI]];
+        if (np.z < 0.04) continue;
+        var dn = (np.z + 1) / 2, pulse = reduce ? 0.6 : 0.5 + 0.5 * Math.sin(now / 540 + nI * 1.4);
+        var gr = 9 + 6 * pulse;
+        var g = ctx.createRadialGradient(np.sx, np.sy, 0, np.sx, np.sy, gr);
+        g.addColorStop(0, "rgba(" + P.node + "," + (0.5 * dn).toFixed(3) + ")");
+        g.addColorStop(1, "rgba(" + P.node + ",0)");
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(np.sx, np.sy, gr, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.fillStyle = "rgba(" + P.spark + "," + (0.9 * dn).toFixed(3) + ")";
+        ctx.arc(np.sx, np.sy, 2.3 + 1.1 * dn, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    var raf = null;
+    function frame(now) {
+      ang += 0.0026; curX += (tiltX - curX) * .06; curY += (tiltY - curY) * .06;
+      draw(now || 0);
+      if (!reduce && !document.hidden) raf = requestAnimationFrame(frame); else raf = null;
+    }
+    try {
+      new MutationObserver(function () { setPalette(); if (reduce || !raf) draw(performance.now ? performance.now() : 0); })
+        .observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    } catch (e) {}
+    if (reduce) { draw(0); }
+    else {
+      document.addEventListener("visibilitychange", function () { if (!document.hidden && raf === null) raf = requestAnimationFrame(frame); });
+      raf = requestAnimationFrame(frame);
     }
   }
 
