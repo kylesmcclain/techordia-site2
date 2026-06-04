@@ -139,12 +139,15 @@
 
     else if (mode === "lanes") {
       mk(880, 540);
+      var managed = box.getAttribute("data-variant") === "managed";
       var midX = 440, lx = 150, rx = 730, ys = [150, 270, 390];
-      svg.appendChild(el("line", { x1: midX, y1: 70, x2: midX, y2: 470, class: "fx-ring", "stroke-dasharray": "2 8" }));
-      svg.appendChild(txt(lx, 96, "YOUR INTERNAL IT", "fx-cap"));
-      svg.appendChild(txt(rx, 96, "TECHORDIA", "fx-cap"));
-      svg.appendChild(txt(midX, 60, "SHARED VISIBILITY & ESCALATION", "fx-cap"));
-      var midNode = node({ x: midX, y: 270, hub: true, r: 30, glyph: ICON.hub, label: "Shared layer", sub: "tickets · reporting · roadmap", depth: 1 });
+      if (!managed) {
+        svg.appendChild(el("line", { x1: midX, y1: 70, x2: midX, y2: 470, class: "fx-ring", "stroke-dasharray": "2 8" }));
+        svg.appendChild(txt(lx, 96, "YOUR INTERNAL IT", "fx-cap"));
+        svg.appendChild(txt(rx, 96, "TECHORDIA", "fx-cap"));
+        svg.appendChild(txt(midX, 60, "SHARED VISIBILITY & ESCALATION", "fx-cap"));
+      }
+      var midNode = node({ x: midX, y: 270, hub: true, r: 30, glyph: ICON.hub, label: managed ? "TECHORDIA" : "Shared layer", sub: managed ? "one accountable owner" : "tickets · reporting · roadmap", depth: 1 });
       var leftLabels = [["Day-to-day requests", ICON.user], ["Local knowledge", ICON.device], ["Business context", ICON.project]];
       var rightLabels = [["Monitoring & patching", ICON.support], ["Security & backup", ICON.shield], ["Escalation & projects", ICON.m365]];
       var paths = [];

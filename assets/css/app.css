@@ -923,7 +923,7 @@ body.reviews-open {
 .foot a { color: #8fa0bb; }
 .foot a:hover { color: #fff; }
 .foot__top { display: grid; grid-template-columns: 1.7fr 1fr 1fr 1fr; gap: 40px; }
-.foot img { height: 30px; width: auto; max-width: 220px; filter: brightness(0) invert(1); opacity: .92; margin-bottom: 16px; }
+.foot img { height: 32px; width: auto; max-width: 220px; opacity: 1; margin-bottom: 16px; }
 .foot h4 { color: #fff; font-size: .82rem; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 16px; font-weight: 600; }
 .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
 .foot li { font-size: .94rem; }
@@ -1057,6 +1057,9 @@ body.reviews-open {
 .info-row { display: flex; gap: 14px; align-items: flex-start; }
 .info-row .ic { flex: none; }
 .info-row strong { display: block; color: var(--slate); font-family: var(--font-display); }
+.contact-narrow { max-width: 660px; margin-inline: auto; display: grid; gap: 22px; }
+.contact-meta { display: grid; gap: 16px; }
+.hp { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; overflow: hidden; }
 
 /* =========================================================================
    Responsive (desktop-first; QA targets 1440/1600/1920, then graceful down)

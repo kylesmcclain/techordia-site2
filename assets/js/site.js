@@ -212,17 +212,41 @@
   wireReviewCarousel();
   wireReviewSectionVisibility();
 
-  // contact form (front-end only on GitHub Pages)
+  // contact form — submits to FormSubmit (free) which emails info@techordia.com
   var form = document.getElementById("review-form");
   if (form) {
+    var endpoint = "https://formsubmit.co/ajax/info@techordia.com";
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var s = document.getElementById("form-status");
-      if (s) {
-        s.textContent = "Thanks — we’ve noted your request. For the fastest response, call 877-925-4785 to lock in your IT Risk & Reliability Review.";
-        s.style.color = "#10a59e";
-      }
-      form.reset();
+      var btn = form.querySelector('button[type="submit"]');
+      var honey = form.querySelector('[name="_honey"]');
+      if (honey && honey.value) { return; } // bot trap
+      if (s) { s.style.color = "var(--slate-mute)"; s.textContent = "Sending…"; }
+      if (btn) { btn.disabled = true; }
+      fetch(endpoint, {
+        method: "POST",
+        headers: { "Accept": "application/json" },
+        body: new FormData(form)
+      })
+        .then(function (r) { return r.json().catch(function () { return {}; }); })
+        .then(function (res) {
+          var ok = res && (res.success === true || res.success === "true");
+          if (s) {
+            s.textContent = ok
+              ? "Thanks — your request is on its way to our team. For the fastest response, call 877-925-4785."
+              : "Thanks — we’ve noted your request. If you don’t hear back shortly, please call 877-925-4785.";
+            s.style.color = "#10a59e";
+          }
+          form.reset();
+        })
+        .catch(function () {
+          if (s) {
+            s.textContent = "Sorry — we couldn’t send that. Please call 877-925-4785 or email info@techordia.com.";
+            s.style.color = "#e2574c";
+          }
+        })
+        .then(function () { if (btn) { btn.disabled = false; } });
     });
   }
 })();
