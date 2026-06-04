@@ -322,7 +322,7 @@
       .showAtmosphere(true).atmosphereColor(isLight() ? "#2f7bf6" : "#46a6ff").atmosphereAltitude(0.18)
       .arcsData(arcs)
       .arcColor(function () { return ["rgba(56,200,225,0)", "rgba(120,236,236,0.95)", "rgba(56,200,225,0)"]; })
-      .arcStroke(0.5).arcAltitudeAutoScale(0.5)
+      .arcStroke(0.45).arcAltitudeAutoScale(0.26)
       .arcDashLength(0.4).arcDashGap(0.7).arcDashInitialGap(function () { return Math.random(); }).arcDashAnimateTime(reduce ? 0 : 2600)
       .pointsData([HOME].concat(CITIES)).pointLat("lat").pointLng("lng")
       .pointColor(function (d) { return d.home ? "#aef0ff" : "#6fe3da"; })
@@ -333,14 +333,14 @@
 
     loadCountries().then(function (geo) {
       if (!geo || !geo.features) return;
-      world.hexPolygonsData(geo.features).hexPolygonResolution(3).hexPolygonMargin(0.22)
-        .hexPolygonUseDots(true).hexPolygonAltitude(0.007)
-        .hexPolygonColor(function () { return isLight() ? "rgba(28,96,188,0.9)" : "rgba(118,208,250,0.95)"; });
+      world.hexPolygonsData(geo.features).hexPolygonResolution(4).hexPolygonMargin(0.32)
+        .hexPolygonUseDots(true).hexPolygonAltitude(0.006)
+        .hexPolygonColor(function () { return isLight() ? "rgba(28,96,188,0.92)" : "rgba(120,210,250,0.96)"; });
     });
 
-    world.pointOfView({ lat: 18, lng: -95, altitude: 1.95 }, 0);
+    world.pointOfView({ lat: 16, lng: -95, altitude: 1.5 }, 0);
     var ctr = world.controls();
-    ctr.enableZoom = false; ctr.enablePan = false; ctr.autoRotate = !reduce; ctr.autoRotateSpeed = 0.38;
+    ctr.enableZoom = false; ctr.enablePan = false; ctr.autoRotate = !reduce; ctr.autoRotateSpeed = 0.3;
 
     function onResize() { var bw = Math.max(220, box.clientWidth || sz); world.width(bw).height(bw); }
     if (window.ResizeObserver) { try { new ResizeObserver(onResize).observe(box); } catch (e) {} }
