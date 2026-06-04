@@ -262,62 +262,74 @@
     }
   }
 
-  /* ---- Techordia reach globe (canvas) -----------------------------------
-     A rotating wireframe globe (clear latitude/longitude lines, so it reads
-     unmistakably as a globe). Techordia sits as the home base; BOLD glowing
-     arcs reach out from it to six labelled systems — Microsoft 365, devices,
-     security, backups, servers, your team — each with a signal travelling
-     outward along the arc: "one home base reaching and managing everything."
-     Original render (no third-party globe libs). Theme-aware, pointer-
-     reactive, reduced-motion safe.
+  /* ---- Techordia world globe (canvas) -----------------------------------
+     A rotating Earth: subtle continent outlines + a faint lat/long grid.
+     Techordia is pinned at its real home (Alameda, CA) and BOLD highlighted
+     great-circle arcs fly out to client locations all over the planet, each
+     carrying a travelling signal — "from Alameda, we service the globe."
+     Back hemisphere is hidden so it reads as a solid spinning world.
+     Original render: hand-authored coastlines + own great-circle maths, no
+     third-party globe libs. Theme-aware, pointer-reactive, reduced-motion safe.
      ----------------------------------------------------------------------- */
   function buildGlobe(box) {
     var canvas = document.createElement("canvas");
     canvas.className = "fx-globe";
     canvas.setAttribute("role", "img");
     canvas.setAttribute("aria-label", box.getAttribute("data-label") ||
-      "A globe with Techordia as the home base, bold arcs reaching out to Microsoft 365, devices, security, backups, servers, and your team");
+      "A rotating globe with Techordia in Alameda, California and lines reaching out to client locations across the world");
     box.appendChild(canvas);
     var ctx = canvas.getContext("2d");
+    var DEG = Math.PI / 180;
+    function ll(lat, lng) { var la = lat * DEG, lo = lng * DEG, c = Math.cos(la); return [c * Math.cos(lo), Math.sin(la), c * Math.sin(lo)]; }
 
-    // wireframe globe: parallels + meridians as 3D unit-vector polylines ----
-    var LINES = [], li, j;
-    var LATS = [-60, -40, -20, 0, 20, 40, 60];
-    for (li = 0; li < LATS.length; li++) {
-      var la = LATS[li] * Math.PI / 180, ring = [];
-      for (j = 0; j <= 48; j++) { var lo = j / 48 * Math.PI * 2; ring.push([Math.cos(la) * Math.cos(lo), Math.sin(la), Math.cos(la) * Math.sin(lo)]); }
-      LINES.push(ring);
+    // faint lat/long grid (3D unit-vector polylines) ---------------------
+    var GRID = [], gi, gj;
+    var LATS = [-60, -30, 0, 30, 60];
+    for (gi = 0; gi < LATS.length; gi++) {
+      var la = LATS[gi] * DEG, ring = [];
+      for (gj = 0; gj <= 48; gj++) { var lo = gj / 48 * Math.PI * 2; ring.push([Math.cos(la) * Math.cos(lo), Math.sin(la), Math.cos(la) * Math.sin(lo)]); }
+      GRID.push(ring);
     }
     for (var lon = 0; lon < 360; lon += 30) {
-      var lr = lon * Math.PI / 180, mer = [];
-      for (j = 0; j <= 32; j++) { var lt = (-90 + j / 32 * 180) * Math.PI / 180; mer.push([Math.cos(lt) * Math.cos(lr), Math.sin(lt), Math.cos(lt) * Math.sin(lr)]); }
-      LINES.push(mer);
+      var mer = [];
+      for (gj = 0; gj <= 32; gj++) { var lt = (-90 + gj / 32 * 180) * DEG, lr = lon * DEG; mer.push([Math.cos(lt) * Math.cos(lr), Math.sin(lt), Math.cos(lt) * Math.sin(lr)]); }
+      GRID.push(mer);
     }
 
-    // labelled systems Techordia reaches (fixed screen-space unit vectors)
-    var EP = [
-      { label: "Microsoft 365", icon: ICON.m365,   ux:  0.18, uy: -1.00 },
-      { label: "Security",      icon: ICON.shield, ux:  1.00, uy: -0.42 },
-      { label: "Devices",       icon: ICON.device, ux:  1.00, uy:  0.46 },
-      { label: "Backups",       icon: ICON.backup, ux:  0.20, uy:  1.00 },
-      { label: "Servers",       icon: ICON.vendor, ux: -1.00, uy:  0.50 },
-      { label: "Your team",     icon: ICON.user,   ux: -1.00, uy: -0.46 }
+    // subtle continent outlines (hand-authored rough coastlines, [lat,lng]) -
+    var COASTS = [
+      [[66,-162],[60,-141],[55,-131],[48,-124],[40,-124],[34,-120],[30,-115],[23,-110],[18,-103],[15,-95],[9,-80],[18,-92],[26,-97],[29,-89],[25,-81],[31,-81],[36,-76],[41,-70],[45,-66],[50,-60],[55,-58],[60,-65],[63,-78],[68,-95],[70,-125],[69,-141],[66,-162]],
+      [[76,-42],[81,-30],[82,-18],[76,-20],[68,-30],[60,-44],[68,-52],[76,-42]],
+      [[11,-72],[3,-78],[-5,-81],[-15,-75],[-25,-70],[-35,-72],[-46,-74],[-54,-69],[-50,-63],[-38,-58],[-25,-48],[-12,-38],[-5,-35],[2,-50],[8,-60],[11,-72]],
+      [[36,-9],[40,-2],[43,5],[40,18],[40,27],[45,30],[52,30],[60,28],[66,24],[70,25],[63,8],[55,6],[50,-2],[43,-9],[36,-9]],
+      [[35,-6],[33,10],[31,20],[31,32],[20,37],[12,44],[3,42],[-5,40],[-18,37],[-26,33],[-34,20],[-29,16],[-18,12],[-6,9],[5,-3],[12,-15],[20,-17],[28,-12],[35,-6]],
+      [[45,30],[42,42],[37,48],[30,48],[25,57],[25,63],[22,68],[15,74],[8,77],[15,81],[20,87],[16,95],[10,98],[12,106],[22,109],[30,121],[39,122],[43,131],[52,141],[62,160],[68,170],[72,140],[76,108],[78,72],[70,58],[66,46],[55,38],[45,30]],
+      [[-11,131],[-13,142],[-19,147],[-28,153],[-37,150],[-38,141],[-35,136],[-32,116],[-22,114],[-14,127],[-11,131]]
     ];
+    for (var ci = 0; ci < COASTS.length; ci++) for (var cj = 0; cj < COASTS[ci].length; cj++) COASTS[ci][cj] = ll(COASTS[ci][cj][0], COASTS[ci][cj][1]);
+
+    // Techordia home (Alameda, CA) + client locations worldwide ----------
+    var HOME = ll(37.77, -122.24);
+    var CLIENTS = [
+      [40.7, -74.0], [43.7, -79.4], [19.4, -99.1], [51.5, -0.12], [52.5, 13.4],
+      [-23.5, -46.6], [-33.9, 18.4], [25.2, 55.3], [19.1, 72.9], [1.35, 103.8],
+      [35.7, 139.7], [-33.9, 151.2]
+    ].map(function (c) { return ll(c[0], c[1]); });
 
     var P = {};
     function setPalette() {
       var light = document.documentElement.getAttribute("data-theme") === "light";
       P = light
-        ? { wire: "40,110,190", arc: [40, 150, 200], arcHi: [20, 120, 150], glow: "40,150,200", rim: "30,98,190", haloA: .08,
-            nodeBg: "rgba(255,255,255,.95)", nodeSt: "rgba(30,98,190,.34)", glyph: "#1b5fd6", label: "#2c3c54",
-            core: "44,150,210", coreGlyph: "#ffffff", pillBg: "rgba(255,255,255,.95)", pillTx: "#125a86", spark: [20, 120, 150] }
-        : { wire: "96,150,225", arc: [40, 214, 205], arcHi: [174, 240, 255], glow: "50,165,215", rim: "120,170,230", haloA: .15,
-            nodeBg: "rgba(14,28,48,.94)", nodeSt: "rgba(120,180,235,.45)", glyph: "#d4ecff", label: "#b6c6dd",
-            core: "95,215,238", coreGlyph: "#eaf9ff", pillBg: "rgba(8,16,30,.82)", pillTx: "#8fe9ff", spark: [200, 245, 255] };
+        ? { grid: "70,120,180", land: "26,95,175", arc: [30, 140, 195], arcHi: [16, 110, 150], glow: "40,150,200",
+            rim: "30,98,190", haloA: .08, core: "30,120,180", coreGlyph: "#ffffff", pillBg: "rgba(255,255,255,.95)",
+            pillTx: "#125a86", spark: [20, 120, 150], ping: [30, 130, 180] }
+        : { grid: "90,140,205", land: "120,190,240", arc: [40, 214, 205], arcHi: [174, 240, 255], glow: "50,165,215",
+            rim: "120,170,230", haloA: .15, core: "120,225,245", coreGlyph: "#06121f", pillBg: "rgba(8,16,30,.82)",
+            pillTx: "#9fefff", spark: [205, 246, 255], ping: [150, 230, 255] };
     }
     setPalette();
 
-    var W = 1, H = 1, cx = 0, cy = 0, R = 0, Re = 0, hx = 0, hy = 0, nodeR = 12, fs = 12, dpr = 1, M = 1;
+    var W = 1, H = 1, cx = 0, cy = 0, R = 0, nodeR = 12, fs = 12, dpr = 1, M = 1;
     function resize() {
       var r = box.getBoundingClientRect();
       W = Math.max(1, r.width); H = Math.max(1, r.height); M = Math.min(W, H);
@@ -325,24 +337,23 @@
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
       canvas.style.width = W + "px"; canvas.style.height = H + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      cx = W / 2; cy = H / 2; R = M * 0.34; Re = M * 0.40;
-      hx = cx - R * 0.34; hy = cy + R * 0.10;          // Techordia home base on the globe
-      nodeR = Math.max(10, Math.min(16, M * 0.032));
-      fs = Math.max(8.5, Math.min(12.5, M * 0.026));
+      cx = W / 2; cy = H / 2; R = M * 0.38;
+      nodeR = Math.max(7, Math.min(12, M * 0.024));
+      fs = Math.max(8.5, Math.min(12, M * 0.025));
     }
     resize();
     if (window.ResizeObserver) { try { new ResizeObserver(resize).observe(box); } catch (e) {} }
     else window.addEventListener("resize", resize);
 
-    // pointer parallax tilt (globe only) ---------------------------------
-    var tiltX = -0.32, tiltY = 0, curX = -0.32, curY = 0;
+    // pointer parallax tilt ----------------------------------------------
+    var tiltX = 0.40, tiltY = 0, curX = 0.40, curY = 0;       // +tilt centres the view on N. America
     if (!reduce) {
       box.addEventListener("pointermove", function (e) {
         var r = box.getBoundingClientRect();
-        tiltY = ((e.clientX - r.left) / r.width - .5) * 0.45;
-        tiltX = -0.32 + ((e.clientY - r.top) / r.height - .5) * 0.35;
+        tiltY = ((e.clientX - r.left) / r.width - .5) * 0.4;
+        tiltX = 0.40 + ((e.clientY - r.top) / r.height - .5) * 0.3;
       });
-      box.addEventListener("pointerleave", function () { tiltX = -0.32; tiltY = 0; });
+      box.addEventListener("pointerleave", function () { tiltX = 0.40; tiltY = 0; });
     }
 
     function rgb(c, al) { return "rgba(" + (c[0] | 0) + "," + (c[1] | 0) + "," + (c[2] | 0) + "," + al + ")"; }
@@ -356,98 +367,114 @@
       ctx.save(); ctx.translate(x - 12 * s, y - 12 * s); ctx.scale(s, s);
       ctx.fillStyle = color; ctx.fill(new Path2D(d)); ctx.restore();
     }
-    // bold reaching arc from home (hx,hy) to a target, bowed away from globe centre
-    function reachArc(tx, ty, now, phase) {
-      var mx = (hx + tx) / 2, my = (hy + ty) / 2, dx = mx - cx, dy = my - cy, dl = Math.hypot(dx, dy) || 1;
-      var bow = Math.hypot(tx - hx, ty - hy) * 0.28 + R * 0.12;
-      var qx = mx + (dx / dl) * bow, qy = my + (dy / dl) * bow;
-      ctx.lineCap = "round";
-      ctx.strokeStyle = rgb(P.arc, 0.14); ctx.lineWidth = 6;            // soft glow underlay
-      ctx.beginPath(); ctx.moveTo(hx, hy); ctx.quadraticCurveTo(qx, qy, tx, ty); ctx.stroke();
-      ctx.strokeStyle = rgb(P.arcHi, 0.9); ctx.lineWidth = 2.4;         // bold bright core
-      ctx.beginPath(); ctx.moveTo(hx, hy); ctx.quadraticCurveTo(qx, qy, tx, ty); ctx.stroke();
-      if (!reduce) {
-        var t = (now / 2300 + phase) % 1, it = 1 - t;                   // home -> target
-        var bx = it * it * hx + 2 * it * t * qx + t * t * tx;
-        var by = it * it * hy + 2 * it * t * qy + t * t * ty;
-        ctx.fillStyle = rgb(P.spark, 1); ctx.beginPath(); ctx.arc(bx, by, 2.6, 0, Math.PI * 2); ctx.fill();
-      }
+    function slerp(a, b, t) {
+      var d = a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; d = d < -1 ? -1 : d > 1 ? 1 : d;
+      var om = Math.acos(d); if (om < 1e-4) return [a[0], a[1], a[2]];
+      var s = Math.sin(om), w1 = Math.sin((1 - t) * om) / s, w2 = Math.sin(t * om) / s;
+      return [a[0] * w1 + b[0] * w2, a[1] * w1 + b[1] * w2, a[2] * w1 + b[2] * w2];
     }
 
-    var ang = 0;
+    var ANG0 = 2.5, ang = 2.5;                  // ANG0 centres Alameda's longitude on the front
     function draw(now) {
       ctx.clearRect(0, 0, W, H);
-      // soft halo behind the globe
-      var halo = ctx.createRadialGradient(cx, cy, R * 0.15, cx, cy, R * 1.7);
-      halo.addColorStop(0, "rgba(" + P.glow + "," + P.haloA + ")");
-      halo.addColorStop(1, "rgba(" + P.glow + ",0)");
-      ctx.fillStyle = halo; ctx.fillRect(0, 0, W, H);
+      var cosY = Math.cos(ang + curY), sinY = Math.sin(ang + curY), cosX = Math.cos(curX), sinX = Math.sin(curX);
+      // project a unit vector (optionally lifted by altitude scale) to screen
+      function project(v, scale) {
+        var x1 = v[0] * cosY + v[2] * sinY, z1 = -v[0] * sinY + v[2] * cosY;
+        var y2 = v[1] * cosX - z1 * sinX, z2 = v[1] * sinX + z1 * cosX, s = scale || 1;
+        return { sx: cx + x1 * R * s, sy: cy - y2 * R * s, z: z2 };
+      }
 
-      // --- rotating wireframe globe ---
-      var cosY = Math.cos(ang + curY), sinY = Math.sin(ang + curY);
-      var cosX = Math.cos(curX), sinX = Math.sin(curX);
-      ctx.lineWidth = 1;
-      for (var l = 0; l < LINES.length; l++) {
-        var L = LINES[l], prev = null;
-        for (var k = 0; k < L.length; k++) {
-          var p = L[k];
-          var x1 = p[0] * cosY + p[2] * sinY, z1 = -p[0] * sinY + p[2] * cosY;
-          var y2 = p[1] * cosX - z1 * sinX, z2 = p[1] * sinX + z1 * cosX;
-          var cur = { sx: cx + x1 * R, sy: cy - y2 * R, z: z2 };
+      // soft halo + solid ocean disc so the planet reads as a body
+      var halo = ctx.createRadialGradient(cx, cy, R * 0.2, cx, cy, R * 1.7);
+      halo.addColorStop(0, "rgba(" + P.glow + "," + P.haloA + ")"); halo.addColorStop(1, "rgba(" + P.glow + ",0)");
+      ctx.fillStyle = halo; ctx.fillRect(0, 0, W, H);
+      var ocean = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.3, R * 0.2, cx, cy, R);
+      ocean.addColorStop(0, "rgba(" + P.glow + ",0.10)"); ocean.addColorStop(1, "rgba(" + P.glow + ",0.02)");
+      ctx.fillStyle = ocean; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+
+      // helper: stroke a polyline of unit vectors, front hemisphere only
+      function strokePoly(poly, colorStr, baseA, width) {
+        var prev = null;
+        for (var k = 0; k < poly.length; k++) {
+          var cur = project(poly[k]);
           if (prev) {
-            var f = ((prev.z + cur.z) / 2 + 1) / 2;                     // 0 back .. 1 front
-            ctx.strokeStyle = "rgba(" + P.wire + "," + (0.05 + 0.32 * f).toFixed(3) + ")";
-            ctx.beginPath(); ctx.moveTo(prev.sx, prev.sy); ctx.lineTo(cur.sx, cur.sy); ctx.stroke();
+            var f = ((prev.z + cur.z) / 2 + 1) / 2;
+            if (f > 0.52) {
+              ctx.strokeStyle = "rgba(" + colorStr + "," + (baseA * (f - 0.5) * 2).toFixed(3) + ")";
+              ctx.lineWidth = width; ctx.beginPath(); ctx.moveTo(prev.sx, prev.sy); ctx.lineTo(cur.sx, cur.sy); ctx.stroke();
+            }
           }
           prev = cur;
         }
       }
-      // crisp outline
+      ctx.lineCap = "round";
+      for (var g = 0; g < GRID.length; g++) strokePoly(GRID[g], P.grid, 0.15, 1);       // faint grid
+      for (var c = 0; c < COASTS.length; c++) strokePoly(COASTS[c], P.land, 1.0, 1.7);  // continents
       ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(" + P.rim + ",0.34)"; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.strokeStyle = "rgba(" + P.rim + ",0.4)"; ctx.lineWidth = 1.2; ctx.stroke();
 
-      // --- bold reaching arcs (home -> each system) ---
-      for (var e = 0; e < EP.length; e++) {
-        var ep = EP[e];
-        reachArc(cx + ep.ux * Re, cy + ep.uy * Re, now, e * 0.17);
+      // --- highlighted arcs: Alameda -> each client location ---
+      var hp = project(HOME);
+      for (var i = 0; i < CLIENTS.length; i++) {
+        var cl = CLIENTS[i], SEG = 30, pr = null, prF = 0;
+        // build + stroke arc with great-circle + altitude lift
+        for (var sIdx = 0; sIdx <= SEG; sIdx++) {
+          var t = sIdx / SEG, v = slerp(HOME, cl, t), alt = 1 + 0.26 * Math.sin(Math.PI * t);
+          var cur2 = project(v, alt), fF = (cur2.z + 1) / 2;
+          if (pr && (fF > 0.34 || prF > 0.34)) {
+            var a2 = Math.max(0, Math.min(1, ((fF + prF) / 2 - 0.32) / 0.5));
+            ctx.strokeStyle = rgb(P.arc, (0.10 + 0.16 * a2).toFixed(3)); ctx.lineWidth = 5;   // glow
+            ctx.beginPath(); ctx.moveTo(pr.sx, pr.sy); ctx.lineTo(cur2.sx, cur2.sy); ctx.stroke();
+            ctx.strokeStyle = rgb(P.arcHi, (0.25 + 0.7 * a2).toFixed(3)); ctx.lineWidth = 1.9; // bold core
+            ctx.beginPath(); ctx.moveTo(pr.sx, pr.sy); ctx.lineTo(cur2.sx, cur2.sy); ctx.stroke();
+          }
+          pr = cur2; prF = fF;
+        }
+        // travelling signal + destination ping
+        if (!reduce) {
+          var tt = (now / 2600 + i * 0.13) % 1, sv = slerp(HOME, cl, tt), salt = 1 + 0.34 * Math.sin(Math.PI * tt), sp = project(sv, salt);
+          if ((sp.z + 1) / 2 > 0.42) { ctx.fillStyle = rgb(P.spark, 0.95); ctx.beginPath(); ctx.arc(sp.sx, sp.sy, 2.3, 0, Math.PI * 2); ctx.fill(); }
+        }
+        var dp = project(cl), df = (dp.z + 1) / 2;
+        if (df > 0.5) {
+          var pulse = reduce ? 0.5 : 0.5 + 0.5 * Math.sin(now / 600 + i);
+          var gg = ctx.createRadialGradient(dp.sx, dp.sy, 0, dp.sx, dp.sy, 4 + 4 * pulse);
+          gg.addColorStop(0, rgb(P.ping, 0.5 * (df - 0.5) * 2)); gg.addColorStop(1, rgb(P.ping, 0));
+          ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(dp.sx, dp.sy, 4 + 4 * pulse, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = rgb(P.ping, 0.9 * (df - 0.5) * 2); ctx.beginPath(); ctx.arc(dp.sx, dp.sy, 1.9, 0, Math.PI * 2); ctx.fill();
+        }
       }
 
-      // --- system endpoints: node + icon + label ---
-      ctx.textBaseline = "top";
-      for (var e2 = 0; e2 < EP.length; e2++) {
-        var ep2 = EP[e2], nx = cx + ep2.ux * Re, ny = cy + ep2.uy * Re;
-        ctx.beginPath(); ctx.fillStyle = P.nodeBg; ctx.arc(nx, ny, nodeR, 0, Math.PI * 2); ctx.fill();
-        ctx.lineWidth = 1.2; ctx.strokeStyle = P.nodeSt; ctx.stroke();
-        glyph(ep2.icon, nx, ny, nodeR * 1.28, P.glyph);
-        ctx.font = "600 " + fs.toFixed(1) + "px 'Space Grotesk', system-ui, sans-serif";
-        ctx.textAlign = "center"; ctx.fillStyle = P.label;
-        if (ep2.uy > 0.6) ctx.fillText(ep2.label, nx, ny - nodeR - fs - 4);   // bottom node: label above
-        else ctx.fillText(ep2.label, nx, ny + nodeR + 4);
+      // --- Techordia home base (Alameda) ---
+      var hf = (hp.z + 1) / 2;
+      if (hf > 0.42) {
+        if (!reduce) {
+          var rp = (now / 1700) % 1;
+          ctx.beginPath(); ctx.arc(hp.sx, hp.sy, nodeR * 0.6 + rp * nodeR * 3, 0, Math.PI * 2);
+          ctx.strokeStyle = "rgba(" + P.core + "," + (0.45 * (1 - rp) * (hf - 0.4)).toFixed(3) + ")"; ctx.lineWidth = 1.4; ctx.stroke();
+        }
+        var cg = ctx.createRadialGradient(hp.sx, hp.sy, 0, hp.sx, hp.sy, nodeR * 2.8);
+        cg.addColorStop(0, "rgba(" + P.core + "," + (0.7 * hf).toFixed(2) + ")"); cg.addColorStop(1, "rgba(" + P.core + ",0)");
+        ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(hp.sx, hp.sy, nodeR * 2.8, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.fillStyle = "rgba(" + P.core + ",0.98)"; ctx.arc(hp.sx, hp.sy, nodeR, 0, Math.PI * 2); ctx.fill();
+        glyph(ICON.hub, hp.sx, hp.sy, nodeR * 1.4, P.coreGlyph);
+        // label pill
+        var lbl = "TECHORDIA · ALAMEDA";
+        ctx.font = "700 " + (fs * 0.86).toFixed(1) + "px 'Space Grotesk', system-ui, sans-serif";
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        var lw = ctx.measureText(lbl).width, ph = fs + 8, py = hp.sy + nodeR + ph * 0.85;
+        ctx.globalAlpha = Math.min(1, (hf - 0.42) * 4);
+        ctx.fillStyle = P.pillBg; rrect(hp.sx - lw / 2 - 9, py - ph / 2, lw + 18, ph, ph / 2); ctx.fill();
+        ctx.fillStyle = P.pillTx; ctx.fillText(lbl, hp.sx, py + 0.5);
+        ctx.globalAlpha = 1;
       }
-
-      // --- Techordia home base ---
-      if (!reduce) {                                     // outward "reaching" pulse
-        var pr = (now / 1700) % 1;
-        ctx.beginPath(); ctx.arc(hx, hy, nodeR * 0.6 + pr * nodeR * 2.6, 0, Math.PI * 2);
-        ctx.strokeStyle = "rgba(" + P.core + "," + (0.42 * (1 - pr)).toFixed(3) + ")"; ctx.lineWidth = 1.4; ctx.stroke();
-      }
-      var cg = ctx.createRadialGradient(hx, hy, 0, hx, hy, nodeR * 2.6);
-      cg.addColorStop(0, "rgba(" + P.core + ",0.62)"); cg.addColorStop(1, "rgba(" + P.core + ",0)");
-      ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(hx, hy, nodeR * 2.6, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.fillStyle = "rgba(" + P.core + ",0.97)"; ctx.arc(hx, hy, nodeR * 1.05, 0, Math.PI * 2); ctx.fill();
-      glyph(ICON.hub, hx, hy, nodeR * 1.55, P.coreGlyph);
-      // "TECHORDIA" pill under the home base
-      var lbl = "TECHORDIA";
-      ctx.font = "700 " + (fs * 0.9).toFixed(1) + "px 'Space Grotesk', system-ui, sans-serif";
-      ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      var lw = ctx.measureText(lbl).width, ph = fs + 9, py = hy + nodeR * 2.5;
-      ctx.fillStyle = P.pillBg; rrect(hx - lw / 2 - 9, py - ph / 2, lw + 18, ph, ph / 2); ctx.fill();
-      ctx.fillStyle = P.pillTx; ctx.fillText(lbl, hx, py + 0.5);
     }
 
     var raf = null, running = false;
     function frame(now) {
-      ang += 0.0021; curX += (tiltX - curX) * .06; curY += (tiltY - curY) * .06;
+      ang = ANG0 + 0.22 * Math.sin(now / 9000);   // gentle sway, keeps Alameda framed
+      curX += (tiltX - curX) * .06; curY += (tiltY - curY) * .06;
       draw(now || 0);
       if (!reduce && !document.hidden) { running = true; raf = requestAnimationFrame(frame); }
       else { running = false; raf = null; }
