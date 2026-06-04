@@ -262,16 +262,104 @@
     }
   }
 
-  /* ---- Techordia world globe (canvas) -----------------------------------
-     A rotating Earth: subtle continent outlines + a faint lat/long grid.
-     Techordia is pinned at its real home (Alameda, CA) and BOLD highlighted
-     great-circle arcs fly out to client locations all over the planet, each
-     carrying a travelling signal — "from Alameda, we service the globe."
-     Back hemisphere is hidden so it reads as a solid spinning world.
-     Original render: hand-authored coastlines + own great-circle maths, no
-     third-party globe libs. Theme-aware, pointer-reactive, reduced-motion safe.
+  /* ---- Techordia globe via globe.gl (real 3D WebGL Earth) ----------------
+     Built on the open-source globe.gl library with public-domain Natural
+     Earth country data (dotted continents) and Techordia's own home base in
+     Alameda + arcs to client cities, in brand colours. Falls back to the
+     canvas globe below if WebGL or the CDN is unavailable.
      ----------------------------------------------------------------------- */
+  var _ggl = { loading: false, ready: false, cbs: [] };
+  function loadGlobeGL(cb) {
+    if (_ggl.ready && window.Globe) return cb(true);
+    _ggl.cbs.push(cb);
+    if (_ggl.loading) return;
+    _ggl.loading = true;
+    var s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/globe.gl@2";
+    s.async = true;
+    s.onload = function () { _ggl.ready = !!window.Globe; _ggl.cbs.splice(0).forEach(function (f) { f(_ggl.ready); }); };
+    s.onerror = function () { _ggl.loading = false; _ggl.cbs.splice(0).forEach(function (f) { f(false); }); };
+    document.head.appendChild(s);
+  }
+  var _geo = null;
+  function loadCountries() {
+    if (_geo) return _geo;
+    var urls = [
+      "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@master/geojson/ne_110m_admin_0_countries.geojson",
+      "https://cdn.jsdelivr.net/gh/vasturiano/globe.gl@master/example/datasets/ne_110m_admin_0_countries.geojson"
+    ];
+    _geo = urls.reduce(function (p, url) {
+      return p.then(function (g) { return g || fetch(url).then(function (r) { return r.json(); }).catch(function () { return null; }); });
+    }, Promise.resolve(null));
+    return _geo;
+  }
+
   function buildGlobe(box) {
+    loadGlobeGL(function (ok) {
+      if (!ok || !window.Globe) { canvasGlobe(box); return; }
+      try { initGlobeGL(box); } catch (e) { console.warn("globe.gl init failed", e); canvasGlobe(box); }
+    });
+  }
+
+  function initGlobeGL(box) {
+    function isLight() { return document.documentElement.getAttribute("data-theme") === "light"; }
+    var HOME = { lat: 37.77, lng: -122.24, home: true };
+    var CITIES = [
+      { lat: 40.71, lng: -74.0 }, { lat: 43.7, lng: -79.4 }, { lat: 51.5, lng: -0.12 },
+      { lat: 52.52, lng: 13.4 }, { lat: -23.5, lng: -46.6 }, { lat: -33.9, lng: 18.4 },
+      { lat: 25.2, lng: 55.3 }, { lat: 19.08, lng: 72.88 }, { lat: 1.35, lng: 103.82 },
+      { lat: 35.68, lng: 139.7 }, { lat: -33.87, lng: 151.21 }
+    ];
+    var arcs = CITIES.map(function (c) { return { startLat: HOME.lat, startLng: HOME.lng, endLat: c.lat, endLng: c.lng }; });
+    var sz = Math.max(220, box.clientWidth || box.getBoundingClientRect().width || 460);
+
+    function darkTex() { var t = document.createElement("canvas"); t.width = t.height = 2; var x = t.getContext("2d"); x.fillStyle = isLight() ? "#d3e2f2" : "#0c1e36"; x.fillRect(0, 0, 2, 2); return t.toDataURL(); }
+
+    var world = window.Globe({ rendererConfig: { preserveDrawingBuffer: true, antialias: true, alpha: true }, waitForGlobeReady: false, animateIn: false })(box)
+      .width(sz).height(sz)
+      .backgroundColor("rgba(0,0,0,0)")
+      .globeImageUrl(darkTex())
+      .showAtmosphere(true).atmosphereColor(isLight() ? "#2f7bf6" : "#46a6ff").atmosphereAltitude(0.18)
+      .arcsData(arcs)
+      .arcColor(function () { return ["rgba(56,200,225,0)", "rgba(120,236,236,0.95)", "rgba(56,200,225,0)"]; })
+      .arcStroke(0.5).arcAltitudeAutoScale(0.5)
+      .arcDashLength(0.4).arcDashGap(0.7).arcDashInitialGap(function () { return Math.random(); }).arcDashAnimateTime(reduce ? 0 : 2600)
+      .pointsData([HOME].concat(CITIES)).pointLat("lat").pointLng("lng")
+      .pointColor(function (d) { return d.home ? "#aef0ff" : "#6fe3da"; })
+      .pointAltitude(0.012).pointRadius(function (d) { return d.home ? 0.62 : 0.34; })
+      .ringsData([HOME]).ringLat("lat").ringLng("lng")
+      .ringColor(function () { return "#8fe9f2"; })
+      .ringMaxRadius(3.6).ringPropagationSpeed(1.7).ringRepeatPeriod(reduce ? 4000 : 1100);
+
+    loadCountries().then(function (geo) {
+      if (!geo || !geo.features) return;
+      world.hexPolygonsData(geo.features).hexPolygonResolution(3).hexPolygonMargin(0.22)
+        .hexPolygonUseDots(true).hexPolygonAltitude(0.007)
+        .hexPolygonColor(function () { return isLight() ? "rgba(28,96,188,0.9)" : "rgba(118,208,250,0.95)"; });
+    });
+
+    world.pointOfView({ lat: 18, lng: -95, altitude: 1.95 }, 0);
+    var ctr = world.controls();
+    ctr.enableZoom = false; ctr.enablePan = false; ctr.autoRotate = !reduce; ctr.autoRotateSpeed = 0.38;
+
+    function onResize() { var bw = Math.max(220, box.clientWidth || sz); world.width(bw).height(bw); }
+    if (window.ResizeObserver) { try { new ResizeObserver(onResize).observe(box); } catch (e) {} }
+    else window.addEventListener("resize", onResize);
+
+    try {
+      new MutationObserver(function () {
+        var L = isLight();
+        world.globeImageUrl(darkTex()).atmosphereColor(L ? "#2f7bf6" : "#46a6ff");
+        world.hexPolygonColor(function () { return L ? "rgba(30,98,190,0.85)" : "rgba(108,200,245,0.92)"; });
+      }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    } catch (e) {}
+  }
+
+  /* ---- canvas globe (fallback when globe.gl/WebGL is unavailable) --------
+     A rotating dotted Earth rendered in 2D canvas — hand-authored geography
+     and own great-circle maths. Theme-aware, reduced-motion safe.
+     ----------------------------------------------------------------------- */
+  function canvasGlobe(box) {
     var canvas = document.createElement("canvas");
     canvas.className = "fx-globe";
     canvas.setAttribute("role", "img");
