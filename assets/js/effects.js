@@ -282,38 +282,42 @@
     var DEG = Math.PI / 180;
     function ll(lat, lng) { var la = lat * DEG, lo = lng * DEG, c = Math.cos(la); return [c * Math.cos(lo), Math.sin(la), c * Math.sin(lo)]; }
 
-    // faint lat/long grid (3D unit-vector polylines) ---------------------
-    var GRID = [], gi, gj;
-    var LATS = [-60, -30, 0, 30, 60];
-    for (gi = 0; gi < LATS.length; gi++) {
-      var la = LATS[gi] * DEG, ring = [];
-      for (gj = 0; gj <= 48; gj++) { var lo = gj / 48 * Math.PI * 2; ring.push([Math.cos(la) * Math.cos(lo), Math.sin(la), Math.cos(la) * Math.sin(lo)]); }
-      GRID.push(ring);
-    }
-    for (var lon = 0; lon < 360; lon += 30) {
-      var mer = [];
-      for (gj = 0; gj <= 32; gj++) { var lt = (-90 + gj / 32 * 180) * DEG, lr = lon * DEG; mer.push([Math.cos(lt) * Math.cos(lr), Math.sin(lt), Math.cos(lt) * Math.sin(lr)]); }
-      GRID.push(mer);
-    }
-
-    // subtle continent outlines (hand-authored rough coastlines, [lat,lng]) -
-    var COASTS = [
-      [[66,-162],[60,-141],[55,-131],[48,-124],[40,-124],[34,-120],[30,-115],[23,-110],[18,-103],[15,-95],[9,-80],[18,-92],[26,-97],[29,-89],[25,-81],[31,-81],[36,-76],[41,-70],[45,-66],[50,-60],[55,-58],[60,-65],[63,-78],[68,-95],[70,-125],[69,-141],[66,-162]],
-      [[76,-42],[81,-30],[82,-18],[76,-20],[68,-30],[60,-44],[68,-52],[76,-42]],
-      [[11,-72],[3,-78],[-5,-81],[-15,-75],[-25,-70],[-35,-72],[-46,-74],[-54,-69],[-50,-63],[-38,-58],[-25,-48],[-12,-38],[-5,-35],[2,-50],[8,-60],[11,-72]],
-      [[36,-9],[40,-2],[43,5],[40,18],[40,27],[45,30],[52,30],[60,28],[66,24],[70,25],[63,8],[55,6],[50,-2],[43,-9],[36,-9]],
-      [[35,-6],[33,10],[31,20],[31,32],[20,37],[12,44],[3,42],[-5,40],[-18,37],[-26,33],[-34,20],[-29,16],[-18,12],[-6,9],[5,-3],[12,-15],[20,-17],[28,-12],[35,-6]],
-      [[45,30],[42,42],[37,48],[30,48],[25,57],[25,63],[22,68],[15,74],[8,77],[15,81],[20,87],[16,95],[10,98],[12,106],[22,109],[30,121],[39,122],[43,131],[52,141],[62,160],[68,170],[72,140],[76,108],[78,72],[70,58],[66,46],[55,38],[45,30]],
-      [[-11,131],[-13,142],[-19,147],[-28,153],[-37,150],[-38,141],[-35,136],[-32,116],[-22,114],[-14,127],[-11,131]]
+    // continent polygons (hand-authored simplified geography, [lat,lng]) --
+    // used as a land mask: a dot is drawn wherever the surface falls on land.
+    var POLY = [
+      /* North America */[[71,-156],[68,-165],[65,-166],[60,-164],[58,-153],[55,-131],[52,-128],[48,-125],[42,-124],[34,-120],[30,-115],[23,-110],[20,-106],[18,-103],[15,-96],[13,-91],[8,-83],[8,-78],[12,-83],[16,-88],[18,-94],[20,-97],[26,-97],[29,-94],[30,-89],[29,-83],[25,-81],[31,-81],[35,-76],[40,-74],[44,-67],[47,-64],[50,-58],[53,-56],[56,-61],[60,-65],[63,-78],[66,-72],[69,-78],[72,-95],[74,-115],[72,-128],[70,-141],[71,-156]],
+      /* Greenland */[[60,-45],[64,-40],[70,-22],[76,-19],[81,-25],[82,-38],[78,-58],[72,-55],[66,-52],[60,-45]],
+      /* South America */[[12,-71],[10,-62],[5,-52],[0,-49],[-5,-35],[-9,-35],[-15,-39],[-23,-43],[-30,-50],[-35,-54],[-41,-62],[-46,-66],[-52,-69],[-55,-67],[-50,-73],[-42,-73],[-33,-72],[-24,-70],[-16,-74],[-8,-79],[-2,-80],[4,-77],[9,-77],[12,-71]],
+      /* Africa + Arabia */[[37,-6],[37,10],[33,12],[31,20],[31,32],[24,35],[15,40],[12,44],[12,51],[6,49],[2,46],[-5,40],[-12,40],[-18,37],[-25,34],[-34,26],[-35,19],[-29,16],[-22,14],[-15,12],[-8,13],[-1,9],[4,8],[5,1],[5,-4],[8,-13],[14,-17],[20,-17],[26,-15],[31,-10],[35,-6],[37,-6]],
+      /* Europe */[[36,-6],[38,-9],[43,-9],[47,-4],[49,-1],[51,2],[53,5],[55,8],[58,5],[60,5],[63,8],[66,12],[70,18],[71,26],[67,30],[60,28],[57,22],[55,21],[54,12],[52,3],[49,-1],[47,-2],[44,-1],[43,4],[44,8],[41,17],[40,19],[42,28],[46,30],[45,37],[44,39],[40,28],[38,22],[36,-6]],
+      /* Asia */[[40,28],[45,35],[44,50],[37,49],[30,48],[26,56],[25,62],[23,67],[16,73],[8,77],[12,80],[19,85],[22,92],[16,95],[9,99],[10,105],[14,109],[21,108],[23,117],[30,122],[37,122],[40,124],[43,130],[47,138],[52,141],[59,150],[62,160],[66,170],[70,178],[73,140],[77,110],[79,95],[80,75],[75,68],[68,55],[64,48],[57,38],[50,32],[44,30],[40,28]],
+      /* Australia */[[-11,131],[-12,137],[-15,141],[-13,143],[-18,146],[-25,153],[-34,151],[-38,146],[-38,140],[-35,137],[-32,131],[-33,123],[-32,116],[-26,114],[-20,117],[-15,124],[-12,130],[-11,131]],
+      /* Japan */[[31,131],[34,135],[36,140],[40,142],[42,140],[37,137],[34,132],[31,131]],
+      /* UK + Ireland */[[50,-5],[53,-3],[56,-6],[58,-4],[57,-1],[53,1],[51,1],[50,-5]],
+      /* New Zealand */[[-35,173],[-39,177],[-42,174],[-46,168],[-44,170],[-40,172],[-35,173]],
+      /* Madagascar */[[-12,49],[-16,50],[-23,47],[-25,45],[-20,44],[-14,47],[-12,49]]
     ];
-    for (var ci = 0; ci < COASTS.length; ci++) for (var cj = 0; cj < COASTS[ci].length; cj++) COASTS[ci][cj] = ll(COASTS[ci][cj][0], COASTS[ci][cj][1]);
+    function pip(lat, lng, poly) {
+      var inside = false;
+      for (var a = 0, b = poly.length - 1; a < poly.length; b = a++) {
+        var yi = poly[a][0], xi = poly[a][1], yj = poly[b][0], xj = poly[b][1];
+        if (((yi > lat) !== (yj > lat)) && (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi)) inside = !inside;
+      }
+      return inside;
+    }
+    function onLand(lat, lng) { for (var q = 0; q < POLY.length; q++) if (pip(lat, lng, POLY[q])) return true; return false; }
+    // land dot field: one dot per ~2.8 deg of land, evenly spaced toward poles
+    var LAND = [];
+    for (var dlat = -78; dlat <= 80; dlat += 2.8) {
+      var stepLng = 2.8 / Math.max(0.22, Math.cos(dlat * DEG));
+      for (var dlng = -180; dlng < 180; dlng += stepLng) if (onLand(dlat, dlng)) LAND.push(ll(dlat, dlng));
+    }
 
     // Techordia home (Alameda, CA) + client locations worldwide ----------
     var HOME = ll(37.77, -122.24);
     var CLIENTS = [
-      [40.7, -74.0], [43.7, -79.4], [19.4, -99.1], [51.5, -0.12], [52.5, 13.4],
-      [-23.5, -46.6], [-33.9, 18.4], [25.2, 55.3], [19.1, 72.9], [1.35, 103.8],
-      [35.7, 139.7], [-33.9, 151.2]
+      [40.7, -74.0], [51.5, -0.12], [-23.5, -46.6], [-33.9, 18.4],
+      [25.2, 55.3], [1.35, 103.8], [35.7, 139.7], [-33.9, 151.2]
     ].map(function (c) { return ll(c[0], c[1]); });
 
     var P = {};
@@ -393,26 +397,18 @@
       ocean.addColorStop(0, "rgba(" + P.glow + ",0.10)"); ocean.addColorStop(1, "rgba(" + P.glow + ",0.02)");
       ctx.fillStyle = ocean; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
 
-      // helper: stroke a polyline of unit vectors, front hemisphere only
-      function strokePoly(poly, colorStr, baseA, width) {
-        var prev = null;
-        for (var k = 0; k < poly.length; k++) {
-          var cur = project(poly[k]);
-          if (prev) {
-            var f = ((prev.z + cur.z) / 2 + 1) / 2;
-            if (f > 0.52) {
-              ctx.strokeStyle = "rgba(" + colorStr + "," + (baseA * (f - 0.5) * 2).toFixed(3) + ")";
-              ctx.lineWidth = width; ctx.beginPath(); ctx.moveTo(prev.sx, prev.sy); ctx.lineTo(cur.sx, cur.sy); ctx.stroke();
-            }
-          }
-          prev = cur;
-        }
-      }
+      // --- land dots (front hemisphere only -> a solid spinning planet) ---
       ctx.lineCap = "round";
-      for (var g = 0; g < GRID.length; g++) strokePoly(GRID[g], P.grid, 0.15, 1);       // faint grid
-      for (var c = 0; c < COASTS.length; c++) strokePoly(COASTS[c], P.land, 1.0, 1.7);  // continents
+      for (var d = 0; d < LAND.length; d++) {
+        var lp = project(LAND[d]);
+        if (lp.z <= 0.05) continue;
+        var fr = (lp.z + 1) / 2; fr = (fr - 0.5) * 2;            // 0 at limb .. 1 at centre
+        ctx.fillStyle = "rgba(" + P.land + "," + (0.16 + 0.76 * fr).toFixed(3) + ")";
+        ctx.beginPath(); ctx.arc(lp.sx, lp.sy, 0.6 + 1.1 * fr, 0, Math.PI * 2); ctx.fill();
+      }
+      // crisp rim
       ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(" + P.rim + ",0.4)"; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.strokeStyle = "rgba(" + P.rim + ",0.34)"; ctx.lineWidth = 1.1; ctx.stroke();
 
       // --- highlighted arcs: Alameda -> each client location ---
       var hp = project(HOME);
@@ -420,7 +416,7 @@
         var cl = CLIENTS[i], SEG = 30, pr = null, prF = 0;
         // build + stroke arc with great-circle + altitude lift
         for (var sIdx = 0; sIdx <= SEG; sIdx++) {
-          var t = sIdx / SEG, v = slerp(HOME, cl, t), alt = 1 + 0.26 * Math.sin(Math.PI * t);
+          var t = sIdx / SEG, v = slerp(HOME, cl, t), alt = 1 + 0.16 * Math.sin(Math.PI * t);
           var cur2 = project(v, alt), fF = (cur2.z + 1) / 2;
           if (pr && (fF > 0.34 || prF > 0.34)) {
             var a2 = Math.max(0, Math.min(1, ((fF + prF) / 2 - 0.32) / 0.5));
@@ -433,7 +429,7 @@
         }
         // travelling signal + destination ping
         if (!reduce) {
-          var tt = (now / 2600 + i * 0.13) % 1, sv = slerp(HOME, cl, tt), salt = 1 + 0.34 * Math.sin(Math.PI * tt), sp = project(sv, salt);
+          var tt = (now / 2600 + i * 0.13) % 1, sv = slerp(HOME, cl, tt), salt = 1 + 0.16 * Math.sin(Math.PI * tt), sp = project(sv, salt);
           if ((sp.z + 1) / 2 > 0.42) { ctx.fillStyle = rgb(P.spark, 0.95); ctx.beginPath(); ctx.arc(sp.sx, sp.sy, 2.3, 0, Math.PI * 2); ctx.fill(); }
         }
         var dp = project(cl), df = (dp.z + 1) / 2;
