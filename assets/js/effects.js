@@ -262,150 +262,196 @@
     }
   }
 
-  /* ---- rotating operations globe (canvas) -------------------------------
-     A Fibonacci-sphere point cloud rotating around its axis: brand blue->teal
-     dots fade with depth, a few surface nodes glow and pulse, and connection
-     arcs trace pings across the surface. Pure original render — no third-party
-     assets. Theme-aware, pointer-reactive, reduced-motion safe.
+  /* ---- Techordia operations globe (canvas) ------------------------------
+     A rotating point-globe (your IT environment) ringed by six LABELLED
+     endpoints — Microsoft 365, devices, security, backups, servers, your
+     team. Each is joined to the central Techordia core by a distinct,
+     directional connector: an animated signal travels endpoint -> core, so
+     it reads clearly as "everything reports into Techordia, monitored 24/7."
+     Original render (no third-party globe libs). Theme-aware, pointer-
+     reactive, reduced-motion safe.
      ----------------------------------------------------------------------- */
   function buildGlobe(box) {
     var canvas = document.createElement("canvas");
     canvas.className = "fx-globe";
     canvas.setAttribute("role", "img");
-    canvas.setAttribute("aria-label", box.getAttribute("data-label") || "Techordia connected operations globe");
+    canvas.setAttribute("aria-label", box.getAttribute("data-label") ||
+      "Techordia at the centre, monitoring Microsoft 365, devices, security, backups, servers, and your team as one system");
     box.appendChild(canvas);
     var ctx = canvas.getContext("2d");
 
-    // sphere points (Fibonacci spiral) -----------------------------------
-    var N = 640, pts = [], golden = Math.PI * (3 - Math.sqrt(5));
+    // backdrop sphere points (Fibonacci spiral) --------------------------
+    var N = 440, pts = [], golden = Math.PI * (3 - Math.sqrt(5));
     for (var i = 0; i < N; i++) {
       var uy = 1 - (i / (N - 1)) * 2, rr = Math.sqrt(Math.max(0, 1 - uy * uy)), th = golden * i;
       pts.push({ x: Math.cos(th) * rr, y: uy, z: Math.sin(th) * rr, lat: (uy + 1) / 2 });
     }
-    // evenly spread "live" surface nodes + arcs between them
-    var nodes = [], stepN = Math.max(1, Math.floor(N / 9));
-    for (var k = 5; k < N; k += stepN) nodes.push(k);
-    var arcs = [];
-    for (var a = 0; a + 1 < nodes.length; a += 2) arcs.push([nodes[a], nodes[(a + 3) % nodes.length]]);
+
+    // labelled endpoints that feed the core, placed at 1/3/5/7/9/11 o'clock
+    var EP = [
+      { label: "Microsoft 365", icon: ICON.m365,   ux:  0.5,   uy: -0.866 },
+      { label: "Devices",       icon: ICON.device, ux:  1,     uy:  0 },
+      { label: "Security",      icon: ICON.shield, ux:  0.5,   uy:  0.866 },
+      { label: "Backups",       icon: ICON.backup, ux: -0.5,   uy:  0.866 },
+      { label: "Servers",       icon: ICON.vendor, ux: -1,     uy:  0 },
+      { label: "Your team",     icon: ICON.user,   ux: -0.5,   uy: -0.866 }
+    ];
 
     var P = {};
     function setPalette() {
       var light = document.documentElement.getAttribute("data-theme") === "light";
       P = light
-        ? { a: [27, 95, 214], b: [16, 165, 158], white: .30, dotMax: .82, glow: "40,150,200", node: "16,150,150", spark: "20,120,140", rim: "30,98,190", haloA: .10 }
-        : { a: [79, 150, 255], b: [40, 214, 205], white: .55, dotMax: 1, glow: "50,165,215", node: "111,227,218", spark: "170,238,255", rim: "120,170,230", haloA: .17 };
+        ? { a: [27, 95, 214], b: [16, 165, 158], white: .25, dotMax: .5, glow: "40,150,200", line: "30,120,170",
+            spark: "16,120,150", rim: "30,98,190", haloA: .08, nodeBg: "rgba(255,255,255,.94)", nodeSt: "rgba(30,98,190,.32)",
+            glyph: "#1b5fd6", label: "#33465f", core: "44,150,210", coreGlyph: "#ffffff", pillBg: "rgba(255,255,255,.94)", pillTx: "#125a86" }
+        : { a: [79, 150, 255], b: [40, 214, 205], white: .5, dotMax: .6, glow: "50,165,215", line: "110,205,235",
+            spark: "175,240,255", rim: "120,170,230", haloA: .15, nodeBg: "rgba(14,28,48,.92)", nodeSt: "rgba(120,180,235,.42)",
+            glyph: "#d4ecff", label: "#aebfd6", core: "95,215,238", coreGlyph: "#eaf9ff", pillBg: "rgba(8,16,30,.78)", pillTx: "#8fe9ff" };
     }
     setPalette();
 
-    var W = 1, H = 1, cx = 0, cy = 0, R = 0, dpr = 1;
+    var W = 1, H = 1, cx = 0, cy = 0, Rg = 0, Re = 0, nodeR = 12, fs = 12, dpr = 1, M = 1;
     function resize() {
       var r = box.getBoundingClientRect();
-      W = Math.max(1, r.width); H = Math.max(1, r.height);
+      W = Math.max(1, r.width); H = Math.max(1, r.height); M = Math.min(W, H);
       dpr = Math.min(2, window.devicePixelRatio || 1);
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
       canvas.style.width = W + "px"; canvas.style.height = H + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      cx = W / 2; cy = H / 2; R = Math.min(W, H) * 0.40;
+      cx = W / 2; cy = H / 2; Rg = M * 0.255; Re = M * 0.405;
+      nodeR = Math.max(10, Math.min(17, M * 0.034));
+      fs = Math.max(8.5, Math.min(12.5, M * 0.026));
     }
     resize();
     if (window.ResizeObserver) { try { new ResizeObserver(resize).observe(box); } catch (e) {} }
     else window.addEventListener("resize", resize);
 
     // pointer parallax tilt ----------------------------------------------
-    var tiltX = -0.42, tiltY = 0, curX = -0.42, curY = 0;
+    var tiltX = -0.40, tiltY = 0, curX = -0.40, curY = 0;
     if (!reduce) {
       box.addEventListener("pointermove", function (e) {
         var r = box.getBoundingClientRect();
-        tiltY = ((e.clientX - r.left) / r.width - .5) * 0.55;
-        tiltX = -0.42 + ((e.clientY - r.top) / r.height - .5) * 0.5;
+        tiltY = ((e.clientX - r.left) / r.width - .5) * 0.5;
+        tiltX = -0.40 + ((e.clientY - r.top) / r.height - .5) * 0.4;
       });
-      box.addEventListener("pointerleave", function () { tiltX = -0.42; tiltY = 0; });
+      box.addEventListener("pointerleave", function () { tiltX = -0.40; tiltY = 0; });
     }
 
     function lerpC(c1, c2, t) { return [c1[0] + (c2[0] - c1[0]) * t, c1[1] + (c2[1] - c1[1]) * t, c1[2] + (c2[2] - c1[2]) * t]; }
     function rgb(c, al) { return "rgba(" + (c[0] | 0) + "," + (c[1] | 0) + "," + (c[2] | 0) + "," + al + ")"; }
+    function rrect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    }
+    function glyph(d, x, y, size, color) {
+      var s = size / 24;
+      ctx.save(); ctx.translate(x - 12 * s, y - 12 * s); ctx.scale(s, s);
+      ctx.fillStyle = color; ctx.fill(new Path2D(d)); ctx.restore();
+    }
 
     var ang = 0, proj = new Array(N), order = new Array(N);
     for (var z = 0; z < N; z++) order[z] = z;
 
     function draw(now) {
       ctx.clearRect(0, 0, W, H);
-      // soft halo behind the sphere
-      var halo = ctx.createRadialGradient(cx, cy, R * 0.15, cx, cy, R * 1.55);
-      halo.addColorStop(0, rgb([P.glow.split(",")[0] | 0, P.glow.split(",")[1] | 0, P.glow.split(",")[2] | 0], P.haloA));
+      // soft halo behind the globe
+      var halo = ctx.createRadialGradient(cx, cy, Rg * 0.15, cx, cy, Rg * 1.9);
+      halo.addColorStop(0, "rgba(" + P.glow + "," + P.haloA + ")");
       halo.addColorStop(1, "rgba(" + P.glow + ",0)");
       ctx.fillStyle = halo; ctx.fillRect(0, 0, W, H);
-      // thin rim
-      ctx.beginPath(); ctx.arc(cx, cy, R * 1.03, 0, Math.PI * 2);
+      // thin rim around the globe
+      ctx.beginPath(); ctx.arc(cx, cy, Rg * 1.05, 0, Math.PI * 2);
       ctx.strokeStyle = "rgba(" + P.rim + ",0.16)"; ctx.lineWidth = 1; ctx.stroke();
 
+      // --- rotating backdrop sphere (the environment) ---
       var cosY = Math.cos(ang + curY), sinY = Math.sin(ang + curY);
       var cosX = Math.cos(curX), sinX = Math.sin(curX);
       for (var i = 0; i < N; i++) {
         var p = pts[i];
         var x1 = p.x * cosY + p.z * sinY, z1 = -p.x * sinY + p.z * cosY;
         var y2 = p.y * cosX - z1 * sinX, z2 = p.y * sinX + z1 * cosX;
-        proj[i] = { sx: cx + x1 * R, sy: cy - y2 * R, z: z2, lat: p.lat };
+        proj[i] = { sx: cx + x1 * Rg, sy: cy - y2 * Rg, z: z2, lat: p.lat };
       }
       order.sort(function (m, n) { return proj[m].z - proj[n].z; });
-
-      // dots (back-to-front)
       for (var o = 0; o < N; o++) {
         var pp = proj[order[o]], d = (pp.z + 1) / 2;
         var col = lerpC(lerpC(P.a, P.b, pp.lat), [255, 255, 255], d * d * P.white);
         ctx.beginPath();
-        ctx.fillStyle = rgb(col, ((0.10 + 0.62 * d) * P.dotMax).toFixed(3));
-        ctx.arc(pp.sx, pp.sy, 0.8 + 1.7 * d, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = rgb(col, ((0.07 + 0.42 * d) * P.dotMax).toFixed(3));
+        ctx.arc(pp.sx, pp.sy, 0.7 + 1.3 * d, 0, Math.PI * 2); ctx.fill();
       }
 
-      // connection arcs + travelling ping
-      for (var aI = 0; aI < arcs.length; aI++) {
-        var p1 = proj[arcs[aI][0]], p2 = proj[arcs[aI][1]];
-        if (p1.z < -0.08 || p2.z < -0.08) continue;
-        var mx = (p1.sx + p2.sx) / 2, my = (p1.sy + p2.sy) / 2;
-        var nx = mx - cx, ny = my - cy, nl = Math.hypot(nx, ny) || 1;
-        var bulge = Math.hypot(p2.sx - p1.sx, p2.sy - p1.sy) * 0.26;
-        var qx = mx + (nx / nl) * bulge, qy = my + (ny / nl) * bulge;
-        ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.quadraticCurveTo(qx, qy, p2.sx, p2.sy);
-        ctx.strokeStyle = "rgba(" + P.node + ",0.26)"; ctx.lineWidth = 1.1; ctx.stroke();
+      // --- connectors: endpoint -> core, with an inbound travelling signal ---
+      for (var e = 0; e < EP.length; e++) {
+        var ep = EP[e];
+        var nx = cx + ep.ux * Re, ny = cy + ep.uy * Re;            // endpoint node
+        var ix = cx + ep.ux * Rg * 0.98, iy = cy + ep.uy * Rg * 0.98; // lands on globe
+        var lg = ctx.createLinearGradient(nx, ny, ix, iy);
+        lg.addColorStop(0, "rgba(" + P.line + ",0.22)");
+        lg.addColorStop(1, "rgba(" + P.line + ",0.70)");
+        ctx.strokeStyle = lg; ctx.lineWidth = 1.7; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(ix, iy); ctx.stroke();
         if (!reduce) {
-          var tt = (now / 2600 + aI * 0.37) % 1, it = 1 - tt;
-          var bx = it * it * p1.sx + 2 * it * tt * qx + tt * tt * p2.sx;
-          var by = it * it * p1.sy + 2 * it * tt * qy + tt * tt * p2.sy;
-          ctx.beginPath(); ctx.fillStyle = "rgba(" + P.spark + ",0.92)";
-          ctx.arc(bx, by, 1.9, 0, Math.PI * 2); ctx.fill();
+          var t = (now / 2100 + e * 0.16) % 1;          // node(0) -> core(1)
+          for (var s = 0; s < 2; s++) {                  // two signals per line
+            var ts = (t + s * 0.5) % 1;
+            var bx = nx + (ix - nx) * ts, by = ny + (iy - ny) * ts;
+            ctx.beginPath();
+            ctx.fillStyle = "rgba(" + P.spark + "," + (0.95 * (1 - ts * 0.4)).toFixed(2) + ")";
+            ctx.arc(bx, by, 2.1, 0, Math.PI * 2); ctx.fill();
+          }
         }
       }
 
-      // glowing surface nodes (front hemisphere)
-      for (var nI = 0; nI < nodes.length; nI++) {
-        var np = proj[nodes[nI]];
-        if (np.z < 0.04) continue;
-        var dn = (np.z + 1) / 2, pulse = reduce ? 0.6 : 0.5 + 0.5 * Math.sin(now / 540 + nI * 1.4);
-        var gr = 9 + 6 * pulse;
-        var g = ctx.createRadialGradient(np.sx, np.sy, 0, np.sx, np.sy, gr);
-        g.addColorStop(0, "rgba(" + P.node + "," + (0.5 * dn).toFixed(3) + ")");
-        g.addColorStop(1, "rgba(" + P.node + ",0)");
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(np.sx, np.sy, gr, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.fillStyle = "rgba(" + P.spark + "," + (0.9 * dn).toFixed(3) + ")";
-        ctx.arc(np.sx, np.sy, 2.3 + 1.1 * dn, 0, Math.PI * 2); ctx.fill();
+      // --- central Techordia core ---
+      if (!reduce) {                                     // live monitoring pulse
+        var pr = (now / 1700) % 1;
+        ctx.beginPath(); ctx.arc(cx, cy, Rg * 0.18 + pr * Rg * 0.95, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(" + P.core + "," + (0.4 * (1 - pr)).toFixed(3) + ")"; ctx.lineWidth = 1.4; ctx.stroke();
       }
+      var cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, nodeR * 2.6);
+      cg.addColorStop(0, "rgba(" + P.core + ",0.6)"); cg.addColorStop(1, "rgba(" + P.core + ",0)");
+      ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(cx, cy, nodeR * 2.6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.fillStyle = "rgba(" + P.core + ",0.96)"; ctx.arc(cx, cy, nodeR * 1.02, 0, Math.PI * 2); ctx.fill();
+      glyph(ICON.hub, cx, cy, nodeR * 1.5, P.coreGlyph);
+
+      // --- endpoints: node + icon + label (drawn on top) ---
+      ctx.textAlign = "center"; ctx.textBaseline = "top";
+      for (var e2 = 0; e2 < EP.length; e2++) {
+        var ep2 = EP[e2], nx2 = cx + ep2.ux * Re, ny2 = cy + ep2.uy * Re;
+        ctx.beginPath(); ctx.fillStyle = P.nodeBg; ctx.arc(nx2, ny2, nodeR, 0, Math.PI * 2); ctx.fill();
+        ctx.lineWidth = 1.2; ctx.strokeStyle = P.nodeSt; ctx.stroke();
+        glyph(ep2.icon, nx2, ny2, nodeR * 1.28, P.glyph);
+        ctx.font = "600 " + fs.toFixed(1) + "px 'Space Grotesk', system-ui, sans-serif";
+        ctx.fillStyle = P.label; ctx.fillText(ep2.label, nx2, ny2 + nodeR + 4);
+      }
+
+      // --- "TECHORDIA" pill under the core ---
+      var lbl = "TECHORDIA";
+      ctx.font = "700 " + (fs * 0.9).toFixed(1) + "px 'Space Grotesk', system-ui, sans-serif";
+      ctx.textBaseline = "middle";
+      var lw = ctx.measureText(lbl).width, ph = fs + 9, py = cy + nodeR * 2.55;
+      ctx.fillStyle = P.pillBg; rrect(cx - lw / 2 - 9, py - ph / 2, lw + 18, ph, ph / 2); ctx.fill();
+      ctx.fillStyle = P.pillTx; ctx.fillText(lbl, cx, py + 0.5);
     }
 
-    var raf = null;
+    var raf = null, running = false;
     function frame(now) {
-      ang += 0.0026; curX += (tiltX - curX) * .06; curY += (tiltY - curY) * .06;
+      ang += 0.0023; curX += (tiltX - curX) * .06; curY += (tiltY - curY) * .06;
       draw(now || 0);
-      if (!reduce && !document.hidden) raf = requestAnimationFrame(frame); else raf = null;
+      if (!reduce && !document.hidden) { running = true; raf = requestAnimationFrame(frame); }
+      else { running = false; raf = null; }
     }
+    function startLoop() { if (!running && !reduce && !document.hidden) { running = true; raf = requestAnimationFrame(frame); } }
     try {
-      new MutationObserver(function () { setPalette(); if (reduce || !raf) draw(performance.now ? performance.now() : 0); })
+      new MutationObserver(function () { setPalette(); draw(performance.now ? performance.now() : 0); })
         .observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     } catch (e) {}
-    if (reduce) { draw(0); }
-    else {
-      document.addEventListener("visibilitychange", function () { if (!document.hidden && raf === null) raf = requestAnimationFrame(frame); });
-      raf = requestAnimationFrame(frame);
+    draw(0);                                  // always paint one static frame, even if hidden/backgrounded
+    if (!reduce) {
+      document.addEventListener("visibilitychange", startLoop);
+      startLoop();
     }
   }
 
