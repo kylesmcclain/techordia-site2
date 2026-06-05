@@ -122,7 +122,7 @@ strong { color: inherit; font-weight: 700; }
 .eyebrow {
   font-family: var(--font-display);
   font-size: .82rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--teal-deep); margin: 0 0 18px; display: inline-flex; align-items: center; gap: 10px;
+  color: #0a6b61; margin: 0 0 18px; display: inline-flex; align-items: center; gap: 10px;
 }
 .eyebrow::before { content: ""; width: 26px; height: 2px; background: var(--grad); border-radius: 2px; }
 .dark .eyebrow { color: #58e0d6; }
@@ -167,25 +167,6 @@ strong { color: inherit; font-weight: 700; }
   backdrop-filter: blur(14px) saturate(160%);
   border-bottom: 1px solid var(--hairline);
 }
-.utilitybar {
-  border-bottom: 1px solid var(--hairline);
-  background: rgba(9, 18, 33, .88);
-  color: var(--ink-soft);
-  font-family: var(--font-display);
-  font-size: .86rem;
-  font-weight: 600;
-}
-.utilitybar__row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 22px;
-  min-height: 34px;
-}
-.utilitybar a {
-  color: #58e0d6;
-  white-space: nowrap;
-}
 .masthead__row { display: flex; align-items: center; justify-content: space-between; height: 74px; gap: 24px; }
 .brand { display: inline-flex; align-items: center; }
 .brand img { height: 34px; width: auto; max-width: min(220px, 46vw); object-fit: contain; }
@@ -197,15 +178,13 @@ strong { color: inherit; font-weight: 700; }
 }
 .mainnav a:hover, .navitem:hover > button, .mainnav a.is-active { color: #fff; background: rgba(255,255,255,.06); }
 .navitem { position: relative; }
-.navitem__caret { width: 12px; height: 12px; transition: transform .2s; }
-.navitem:hover .navitem__caret { transform: rotate(180deg); }
 .dropdown {
   position: absolute; top: calc(100% + 8px); left: 0; min-width: 264px;
   background: var(--panel); border: 1px solid var(--hairline-strong); border-radius: var(--r-md);
   padding: 8px; box-shadow: var(--shadow-dark);
   opacity: 0; visibility: hidden; transform: translateY(8px); transition: .18s;
 }
-.navitem:hover .dropdown, .navitem:focus-within .dropdown { opacity: 1; visibility: visible; transform: none; }
+.navitem.is-open .dropdown, .navitem:hover .dropdown, .navitem:focus-within .dropdown { opacity: 1; visibility: visible; transform: none; }
 .dropdown a { display: flex; flex-direction: column; gap: 2px; padding: 11px 13px; border-radius: var(--r-sm); }
 .dropdown a strong { color: var(--ink); font-family: var(--font-display); font-weight: 600; font-size: .96rem; }
 .dropdown a span { font-family: var(--font-body); font-size: .84rem; color: var(--ink-mute); font-weight: 450; }
@@ -281,10 +260,6 @@ strong { color: inherit; font-weight: 700; }
 [data-theme="light"] .masthead {
   background: color-mix(in srgb, var(--surface) 84%, transparent);
   border-bottom-color: rgba(47, 123, 246, .18);
-}
-[data-theme="light"] .utilitybar {
-  background: rgba(235, 246, 255, .92);
-  color: var(--slate-soft);
 }
 [data-theme="light"] .mainnav a,
 [data-theme="light"] .navitem > button,
@@ -1099,7 +1074,6 @@ body.reviews-open {
   .foot__top { grid-template-columns: 1fr; }
   .band { padding: 32px 22px; }
   .row2 { grid-template-columns: 1fr; }
-  .utilitybar__row { flex-direction: column; gap: 0; padding-block: 6px; }
   .google-review-section { padding: 54px 0 78px; }
   .google-review-stage { border-radius: 18px 18px 0 0; padding: 22px 18px 30px; }
   .google-review-head h2 { font-size: 2.35rem; }
@@ -1121,7 +1095,7 @@ body.reviews-open {
 .tw-q{border:1px solid var(--tw-bd);background:var(--tw-bg);border-radius:14px;padding:22px 18px;text-align:center;transition:transform .25s ease,box-shadow .25s ease;}
 .tw-q:hover{transform:translateY(-5px);box-shadow:0 16px 34px -20px rgba(20,40,80,.55);}
 .tw-q h3{font-family:var(--font-display);font-weight:700;font-size:1.06rem;margin:0 0 8px;color:var(--tw-ink);}
-.tw-q p{margin:0;font-size:.93rem;line-height:1.5;color:var(--tw-ink);opacity:.82;}
+.tw-q p{margin:0;font-size:.93rem;line-height:1.5;color:#46506a;}
 .tw-q--thorough{--tw-bg:#f4f1fd;--tw-bd:#d8cff5;--tw-ink:#5b46c4;}
 .tw-q--accountable{--tw-bg:#e9faf5;--tw-bd:#c2ece1;--tw-ink:#129b86;}
 .tw-q--pride{--tw-bg:#fdf0ee;--tw-bd:#f3d3cd;--tw-ink:#cf5d53;}
@@ -1130,3 +1104,6 @@ body.reviews-open {
 .tw-q--integrity{--tw-bg:#fcf4e7;--tw-bd:#f0dcbd;--tw-ink:#c2872f;}
 @media (max-width:760px){.tw-grid{grid-template-columns:1fr 1fr;}}
 @media (max-width:480px){.tw-grid{grid-template-columns:1fr;}}
+
+/* visible keyboard focus across the whole site */
+a:focus-visible, button:focus-visible, .mainnav a:focus-visible, .navitem > button:focus-visible, .navtoggle:focus-visible, .btn:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #6fe3da; outline-offset: 2px; border-radius: 4px; }

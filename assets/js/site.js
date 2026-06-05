@@ -53,6 +53,27 @@
     });
   }
 
+  // services dropdown: click/touch + keyboard support (hover still works on desktop)
+  var svcItem = document.querySelector(".mainnav .navitem");
+  var svcBtn = svcItem && svcItem.querySelector("button");
+  if (svcItem && svcBtn) {
+    var openSvc = function () { svcItem.classList.add("is-open"); svcBtn.setAttribute("aria-expanded", "true"); };
+    var closeSvc = function () { svcItem.classList.remove("is-open"); svcBtn.setAttribute("aria-expanded", "false"); };
+    svcBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (svcItem.classList.contains("is-open")) { closeSvc(); } else { openSvc(); }
+    });
+    document.addEventListener("click", function (e) {
+      if (svcItem.classList.contains("is-open") && !svcItem.contains(e.target)) { closeSvc(); }
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && svcItem.classList.contains("is-open")) { closeSvc(); svcBtn.focus(); }
+    });
+    svcItem.addEventListener("focusout", function (e) {
+      if (!svcItem.contains(e.relatedTarget)) { closeSvc(); }
+    });
+  }
+
   // reveal on scroll
   var items = document.querySelectorAll(".reveal");
   var showRevealItems = function () {

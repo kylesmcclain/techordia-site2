@@ -3,19 +3,47 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Page not found — Techordia</title>
+<title>Page not found | Techordia</title>
+<meta name="robots" content="noindex" />
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="assets/css/app.css?v=20260604-19" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/app.css?v=20260604-21" />
 <style>
-  .nf { min-height: 80vh; display: grid; place-items: center; text-align: center; }
+  .nf { min-height: 64vh; display: grid; place-items: center; text-align: center; }
   .nf .big { font-family: var(--font-display); font-weight: 700; font-size: clamp(4rem, 14vw, 9rem);
     line-height: 1; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 </style>
 </head>
-<body class="dark">
+<body>
+<header class="masthead">
+  <div class="wrap masthead__row">
+    <a class="brand" href="index.html" aria-label="Techordia — home"><img src="assets/img/logo.png?v=20260604-21" alt="Techordia" /></a>
+    <nav class="mainnav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <div class="navitem">
+        <button type="button" aria-haspopup="true" aria-expanded="false" aria-controls="services-menu">Services</button>
+        <div class="dropdown" id="services-menu">
+          <a href="managed-it.html"><strong>Managed IT</strong><span>We own the daily IT rhythm</span></a>
+          <a href="it-projects.html"><strong>IT Projects</strong><span>Controlled delivery &amp; cutovers</span></a>
+        </div>
+      </div>
+      <a href="techordia-way.html">The Techordia Way</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="header-cta">
+      <a href="tel:8779254785" class="textlink nowrap">877·925·4785</a>
+      <a href="contact.html" class="btn btn--primary">Book a consultation</a>
+    </div>
+    <button class="navtoggle" aria-label="Menu" aria-expanded="false"><span></span></button>
+  </div>
+</header>
+
+<main>
 <section class="nf hero">
   <div class="hero__glow" aria-hidden="true"></div>
+  <div class="hero__grid-bg" aria-hidden="true"></div>
   <div class="wrap hero__inner">
     <div class="big">404</div>
     <h1>That page wandered off</h1>
@@ -26,5 +54,20 @@
     </div>
   </div>
 </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__top">
+      <div><img src="assets/img/logo.png?v=20260604-21" alt="Techordia" /><p class="measure">Managed IT, IT projects, and strategic guidance for growing Bay Area businesses.</p></div>
+      <div><h4>Services</h4><ul><li><a href="managed-it.html">Managed IT</a></li><li><a href="it-projects.html">IT Projects</a></li></ul></div>
+      <div><h4>Company</h4><ul><li><a href="techordia-way.html">The Techordia Way</a></li><li><a href="services.html">All services</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+      <div><h4>Talk to us</h4><ul><li><a href="tel:8779254785">877·925·4785</a></li><li><a href="contact.html">Book a consultation</a></li><li>Based in Alameda, serving the world</li><li><a href="https://www.linkedin.com/company/techordia-llc" target="_blank" rel="noopener">LinkedIn</a></li></ul></div>
+    </div>
+    <div class="foot__bottom"><span>© <span id="yr">2026</span> Techordia. All rights reserved.</span><span>Predictable, secure IT for growing SMBs.</span></div>
+  </div>
+</footer>
+
+<script src="assets/js/site.js?v=20260604-21" defer></script>
 </body>
 </html>
