@@ -230,7 +230,7 @@
     else if (mode === "selector") {
       mk(520, 520);
       var sx2 = 260, sy2 = 262, SR = 158;
-      var svc = [["managed", "Managed IT", ICON.hub], ["co", "Co-Managed IT", ICON.user], ["cyber", "Cybersecurity", ICON.shield], ["projects", "IT Projects", ICON.project]];
+      var svc = [["managed", "Managed IT", ICON.hub], ["projects", "IT Projects", ICON.project]];
       var hub2 = node({ x: sx2, y: sy2, hub: true, r: 30, glyph: ICON.support, label: "Techordia", depth: 1 });
       var sn = [];
       for (var q = 0; q < svc.length; q++) {
