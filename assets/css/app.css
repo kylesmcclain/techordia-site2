@@ -1110,3 +1110,23 @@ body.reviews-open {
   .google-float__chat { right: 14px; bottom: 18px; width: 54px; height: 54px; }
   .google-review-drawer { top: 38px; right: 10px; bottom: 14px; width: calc(100vw - 20px); }
 }
+
+
+/* ===== The Techordia Way - qualities graphic (centered exhibit) ===== */
+.tw-graphic{max-width:900px;margin-inline:auto;text-align:center;background:#f6f7f9;border:1px solid #e7ebf1;border-radius:22px;padding:clamp(26px,4vw,48px);box-shadow:0 26px 64px -36px rgba(20,40,80,.5);}
+.tw-graphic__title{font-family:var(--font-display);font-weight:700;font-size:clamp(1.5rem,2.6vw,2.1rem);letter-spacing:-.02em;margin:0;color:#1f2a44;}
+.tw-graphic__sub{margin:10px 0 0;color:#5b6b85;font-size:1.02rem;}
+.tw-graphic__rule{display:block;height:1px;border:0;background:linear-gradient(90deg,transparent,#dde3ec 18%,#dde3ec 82%,transparent);margin:22px auto 32px;max-width:600px;}
+.tw-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;}
+.tw-q{border:1px solid var(--tw-bd);background:var(--tw-bg);border-radius:14px;padding:22px 18px;text-align:center;transition:transform .25s ease,box-shadow .25s ease;}
+.tw-q:hover{transform:translateY(-5px);box-shadow:0 16px 34px -20px rgba(20,40,80,.55);}
+.tw-q h3{font-family:var(--font-display);font-weight:700;font-size:1.06rem;margin:0 0 8px;color:var(--tw-ink);}
+.tw-q p{margin:0;font-size:.93rem;line-height:1.5;color:var(--tw-ink);opacity:.82;}
+.tw-q--thorough{--tw-bg:#f4f1fd;--tw-bd:#d8cff5;--tw-ink:#5b46c4;}
+.tw-q--accountable{--tw-bg:#e9faf5;--tw-bd:#c2ece1;--tw-ink:#129b86;}
+.tw-q--pride{--tw-bg:#fdf0ee;--tw-bd:#f3d3cd;--tw-ink:#cf5d53;}
+.tw-q--commitment{--tw-bg:#eef4fd;--tw-bd:#cfe0f7;--tw-ink:#2f6fd0;}
+.tw-q--quality{--tw-bg:#f0f8ea;--tw-bd:#d4ebc5;--tw-ink:#4f9a3c;}
+.tw-q--integrity{--tw-bg:#fcf4e7;--tw-bd:#f0dcbd;--tw-ink:#c2872f;}
+@media (max-width:760px){.tw-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:480px){.tw-grid{grid-template-columns:1fr;}}
