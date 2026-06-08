@@ -228,16 +228,16 @@
   wireReviewCarousel();
   wireReviewSectionVisibility();
 
-  // contact form: submits to FormSubmit (free), which emails kyle.mcclain@techordia.com
+  // contact form: submits to Web3Forms (free), which emails kyle.mcclain@techordia.com
   var form = document.getElementById("review-form");
   if (form) {
-    var endpoint = "https://formsubmit.co/ajax/kyle.mcclain@techordia.com";
+    var endpoint = "https://api.web3forms.com/submit";
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var s = document.getElementById("form-status");
       var btn = form.querySelector('button[type="submit"]');
-      var honey = form.querySelector('[name="_honey"]');
-      if (honey && honey.value) { return; } // bot trap
+      var honey = form.querySelector('[name="botcheck"]');
+      if (honey && honey.checked) { return; } // bot trap
       if (!form.reportValidity()) { return; }
       if (s) { s.style.color = "var(--slate-mute)"; s.textContent = "Sending…"; }
       if (btn) { btn.disabled = true; }
