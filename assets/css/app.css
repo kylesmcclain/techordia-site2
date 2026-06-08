@@ -189,6 +189,15 @@ strong { color: inherit; font-weight: 700; }
 .dropdown a strong { color: var(--ink); font-family: var(--font-display); font-weight: 600; font-size: .96rem; }
 .dropdown a span { font-family: var(--font-body); font-size: .84rem; color: var(--ink-mute); font-weight: 450; }
 .dropdown a:hover { background: rgba(47,123,246,.14); }
+/* two-column mega menu for Services */
+.dropdown--mega { display: grid; grid-template-columns: 268px 256px; gap: 2px 12px; min-width: 0; padding: 12px; }
+.dropdown__h { margin: 0; padding: 6px 13px 8px; font-family: var(--font-display); font-weight: 600;
+  font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-mute); }
+.dropdown--mega .dropdown__cap { flex-direction: row; align-items: center; gap: 0; padding: 8px 13px;
+  font-family: var(--font-display); font-weight: 500; font-size: .92rem; color: var(--ink); }
+.dropdown--mega .dropdown__cap:hover { background: rgba(47,123,246,.14); }
+/* keep anchored service cards clear of the sticky header on jump */
+#capabilities .card[id] { scroll-margin-top: 96px; }
 .header-cta { display: inline-flex; gap: 10px; align-items: center; }
 .navtoggle { display: none; }
 .theme-toggle {
@@ -280,6 +289,9 @@ strong { color: inherit; font-weight: 700; }
 [data-theme="light"] .dropdown a strong { color: var(--slate); }
 [data-theme="light"] .dropdown a span { color: var(--slate-mute); }
 [data-theme="light"] .dropdown a:hover { background: rgba(47,123,246,.08); }
+[data-theme="light"] .dropdown__h { color: var(--slate-mute); }
+[data-theme="light"] .dropdown--mega .dropdown__cap { color: var(--slate); }
+[data-theme="light"] .dropdown--mega .dropdown__cap:hover { background: rgba(47,123,246,.08); }
 [data-theme="light"] .btn--ghost {
   color: var(--blue-deep);
   background: rgba(255,255,255,.58);
@@ -1059,6 +1071,9 @@ body.reviews-open {
   .mainnav.is-open { transform: none; opacity: 1; pointer-events: auto; }
   .navitem .dropdown { position: static; opacity: 1; visibility: visible; transform: none; box-shadow: none;
     background: transparent; border: 0; padding: 0 0 0 12px; }
+  .dropdown--mega { grid-template-columns: 1fr; gap: 0; padding: 0 0 0 12px; }
+  .dropdown__h { padding-left: 0; margin-top: 8px; }
+  .dropdown--mega .dropdown__cap { padding-left: 0; }
   .header-cta .btn { display: none; }
   .google-review-card { flex-basis: calc((100% - 20px) / 2); }
   .google-float__button { right: 22px; bottom: 96px; }
@@ -1107,3 +1122,6 @@ body.reviews-open {
 
 /* visible keyboard focus across the whole site */
 a:focus-visible, button:focus-visible, .mainnav a:focus-visible, .navitem > button:focus-visible, .navtoggle:focus-visible, .btn:focus-visible, [tabindex]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #6fe3da; outline-offset: 2px; border-radius: 4px; }
+
+/* Yelp wordmark in the reviews module */
+.google-wordmark.yelp-mark { color: #d32323; font-weight: 800; letter-spacing: -.01em; }
