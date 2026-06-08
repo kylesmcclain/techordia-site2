@@ -1095,7 +1095,7 @@ body.reviews-open {
 .tw-q{border:1px solid var(--tw-bd);background:var(--tw-bg);border-radius:14px;padding:22px 18px;text-align:center;transition:transform .25s ease,box-shadow .25s ease;}
 .tw-q:hover{transform:translateY(-5px);box-shadow:0 16px 34px -20px rgba(20,40,80,.55);}
 .tw-q h3{font-family:var(--font-display);font-weight:700;font-size:1.06rem;margin:0 0 8px;color:var(--tw-ink);}
-.tw-q p{margin:0;font-size:.93rem;line-height:1.5;color:#46506a;}
+.tw-q p{margin:0;font-size:.93rem;line-height:1.5;color:var(--tw-ink);opacity:.82;}
 .tw-q--thorough{--tw-bg:#f4f1fd;--tw-bd:#d8cff5;--tw-ink:#5b46c4;}
 .tw-q--accountable{--tw-bg:#e9faf5;--tw-bd:#c2ece1;--tw-ink:#129b86;}
 .tw-q--pride{--tw-bg:#fdf0ee;--tw-bd:#f3d3cd;--tw-ink:#cf5d53;}
