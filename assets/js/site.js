@@ -233,16 +233,17 @@
   wireReviewCarousel();
   wireReviewSectionVisibility();
 
-  // contact form — submits to FormSubmit (free) which emails info@techordia.com
+  // contact form: submits to FormSubmit (free), which emails kyle.mcclain@techordia.com
   var form = document.getElementById("review-form");
   if (form) {
-    var endpoint = "https://formsubmit.co/ajax/info@techordia.com";
+    var endpoint = "https://formsubmit.co/ajax/kyle.mcclain@techordia.com";
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var s = document.getElementById("form-status");
       var btn = form.querySelector('button[type="submit"]');
       var honey = form.querySelector('[name="_honey"]');
       if (honey && honey.value) { return; } // bot trap
+      if (!form.reportValidity()) { return; }
       if (s) { s.style.color = "var(--slate-mute)"; s.textContent = "Sending…"; }
       if (btn) { btn.disabled = true; }
       fetch(endpoint, {
@@ -255,15 +256,15 @@
           var ok = res && (res.success === true || res.success === "true");
           if (s) {
             s.textContent = ok
-              ? "Thanks — your request is on its way to our team. For the fastest response, call 877-925-4785."
-              : "Thanks — we’ve noted your request. If you don’t hear back shortly, please call 877-925-4785.";
+              ? "Thanks! Your request is on its way to our team. For the fastest response, call 877-925-4785."
+              : "Thanks! We’ve noted your request. If you don’t hear back shortly, please call 877-925-4785.";
             s.style.color = "#10a59e";
           }
           form.reset();
         })
         .catch(function () {
           if (s) {
-            s.textContent = "Sorry — we couldn’t send that. Please call 877-925-4785 or email info@techordia.com.";
+            s.textContent = "Sorry, we couldn’t send that. Please call 877-925-4785 or email kyle.mcclain@techordia.com.";
             s.style.color = "#e2574c";
           }
         })

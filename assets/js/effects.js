@@ -278,7 +278,7 @@
     if (_ggl.loading) return;
     _ggl.loading = true;
     var s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/globe.gl@2";
+    s.src = "assets/js/vendor/globe.gl.min.js";
     s.async = true;
     s.onload = function () { _ggl.ready = !!window.Globe; _ggl.cbs.splice(0).forEach(function (f) { f(_ggl.ready); }); };
     s.onerror = function () { _ggl.loading = false; _ggl.cbs.splice(0).forEach(function (f) { f(false); }); };
@@ -288,8 +288,8 @@
   function loadCountries() {
     if (_geo) return _geo;
     var urls = [
-      "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@master/geojson/ne_110m_admin_0_countries.geojson",
-      "https://cdn.jsdelivr.net/gh/vasturiano/globe.gl@master/example/datasets/ne_110m_admin_0_countries.geojson"
+      "assets/data/ne_110m_admin_0_countries.geojson",
+      "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@master/geojson/ne_110m_admin_0_countries.geojson"
     ];
     _geo = urls.reduce(function (p, url) {
       return p.then(function (g) { return g || fetch(url).then(function (r) { return r.json(); }).catch(function () { return null; }); });
