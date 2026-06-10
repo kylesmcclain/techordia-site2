@@ -189,15 +189,13 @@ strong { color: inherit; font-weight: 700; }
 .dropdown a strong { color: var(--ink); font-family: var(--font-display); font-weight: 600; font-size: .96rem; }
 .dropdown a span { font-family: var(--font-body); font-size: .84rem; color: var(--ink-mute); font-weight: 450; }
 .dropdown a:hover { background: rgba(47,123,246,.14); }
-/* two-column mega menu for Services */
-.dropdown--mega { display: grid; grid-template-columns: 268px 256px; gap: 2px 12px; min-width: 0; padding: 12px; }
-.dropdown__h { margin: 0; padding: 6px 13px 8px; font-family: var(--font-display); font-weight: 600;
-  font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-mute); }
-.dropdown--mega .dropdown__cap { flex-direction: row; align-items: center; gap: 0; padding: 8px 13px;
-  font-family: var(--font-display); font-weight: 500; font-size: .92rem; color: var(--ink); }
-.dropdown--mega .dropdown__cap:hover { background: rgba(47,123,246,.14); }
-/* keep anchored service cards clear of the sticky header on jump */
-#capabilities .card[id] { scroll-margin-top: 96px; }
+/* Services menu: one plain list — the two ways in up top, then everything inside Managed IT */
+.dropdown--svc { width: 356px; min-width: 0; max-height: calc(100vh - 92px); overflow: auto; }
+.dropdown--svc .dropdown__h { margin: 8px 5px 0; padding: 12px 8px 6px; border-top: 1px solid var(--hairline-strong);
+  font-family: var(--font-display); font-weight: 600; font-size: .68rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink-mute); }
+/* keep anchored sections clear of the sticky header on jump */
+.svc[id] { scroll-margin-top: 92px; }
 .header-cta { display: inline-flex; gap: 10px; align-items: center; }
 .navtoggle { display: none; }
 .theme-toggle {
@@ -290,8 +288,6 @@ strong { color: inherit; font-weight: 700; }
 [data-theme="light"] .dropdown a span { color: var(--slate-mute); }
 [data-theme="light"] .dropdown a:hover { background: rgba(47,123,246,.08); }
 [data-theme="light"] .dropdown__h { color: var(--slate-mute); }
-[data-theme="light"] .dropdown--mega .dropdown__cap { color: var(--slate); }
-[data-theme="light"] .dropdown--mega .dropdown__cap:hover { background: rgba(47,123,246,.08); }
 [data-theme="light"] .btn--ghost {
   color: var(--blue-deep);
   background: rgba(255,255,255,.58);
@@ -1030,6 +1026,21 @@ body.reviews-open {
 .panel { background: var(--panel); border: 1px solid var(--hairline); border-radius: var(--r-md); padding: clamp(22px, 3vw, 34px); }
 .panel--light { background: var(--surface); border-color: var(--paper-3); }
 
+/* managed-it: the plan, service by service */
+.svc { padding-block: clamp(36px, 5vw, 60px); }
+.svc:first-of-type { padding-top: 0; }
+.svc + .svc { border-top: 1px solid var(--paper-3); }
+.svc h3 { font-size: clamp(1.5rem, 2.2vw, 1.85rem); letter-spacing: -.025em; margin: 18px 0 12px; }
+.svc p { color: var(--slate-soft); max-width: 54ch; }
+.svc__listhead { font-family: var(--font-display); font-weight: 600; font-size: .78rem; letter-spacing: .15em;
+  text-transform: uppercase; color: var(--teal-deep); margin: 0 0 4px; }
+.svc .ticks li { color: var(--slate-soft); font-size: .98rem; }
+
+/* clickable capability cards (home) */
+a.card { display: flex; flex-direction: column; }
+a.card p { flex: 1; }
+a.card .textlink { margin-top: 16px; font-size: .95rem; }
+
 /* outcomes / numbered steps row */
 .steps-row { counter-reset: s; }
 .step-card { position: relative; }
@@ -1071,9 +1082,8 @@ body.reviews-open {
   .mainnav.is-open { transform: none; opacity: 1; pointer-events: auto; }
   .navitem .dropdown { position: static; opacity: 1; visibility: visible; transform: none; box-shadow: none;
     background: transparent; border: 0; padding: 0 0 0 12px; }
-  .dropdown--mega { grid-template-columns: 1fr; gap: 0; padding: 0 0 0 12px; }
-  .dropdown__h { padding-left: 0; margin-top: 8px; }
-  .dropdown--mega .dropdown__cap { padding-left: 0; }
+  .dropdown--svc { width: auto; max-height: none; padding: 0 0 0 12px; }
+  .dropdown--svc .dropdown__h { border-top: 0; padding-left: 0; margin: 8px 0 0; }
   .header-cta .btn { display: none; }
   .google-review-card { flex-basis: calc((100% - 20px) / 2); }
   .google-float__button { right: 22px; bottom: 96px; }
