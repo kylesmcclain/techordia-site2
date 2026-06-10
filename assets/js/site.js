@@ -72,6 +72,17 @@
     svcItem.addEventListener("focusout", function (e) {
       if (!svcItem.contains(e.relatedTarget)) { closeSvc(); }
     });
+    // close the menu (and the mobile nav) when a service link is chosen,
+    // so same-page anchor jumps don't leave the menu hanging open
+    svcItem.querySelectorAll(".dropdown a").forEach(function (a) {
+      a.addEventListener("click", function () {
+        closeSvc();
+        if (nav && nav.classList.contains("is-open")) {
+          nav.classList.remove("is-open");
+          if (toggle) { toggle.setAttribute("aria-expanded", "false"); }
+        }
+      });
+    });
   }
 
   // reveal on scroll
@@ -93,6 +104,22 @@
   } else {
     showRevealItems();
   }
+
+  // land cleanly on #anchors from other pages: jump instantly instead of letting
+  // the CSS smooth-scroll animate the initial hash, which late layout shifts
+  // (fonts, fx canvases) can knock off target
+  function jumpToHash() {
+    if (!location.hash || location.hash.length < 2) return;
+    var target = null;
+    try { target = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch (err) { target = null; }
+    if (!target) return;
+    // show the landing section right away; a deep link shouldn't wait on reveal animations
+    if (target.classList.contains("reveal")) { target.classList.add("in"); }
+    target.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("in"); });
+    target.scrollIntoView({ behavior: "instant", block: "start" });
+  }
+  jumpToHash();
+  window.addEventListener("load", jumpToHash);
 
   // footer year
   var y = document.getElementById("yr");
