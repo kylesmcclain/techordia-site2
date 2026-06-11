@@ -162,18 +162,7 @@
     else if (mode === "selector") {
       mk(520, 520);
       var sx2 = 260, sy2 = 262, SR = 158;
-      // build the service list from the cards on the page, so the hub always
-      // matches the nav: data-fx-target keys + optional short data-fx-label
-      var SELICON = { managed: ICON.hub, helpdesk: ICON.support, security: ICON.shield, projects: ICON.project };
-      var selScope = box.closest("[data-fx-scope]") || document;
-      var svc = [];
-      selScope.querySelectorAll("[data-fx-target]").forEach(function (c) {
-        var key = c.getAttribute("data-fx-target");
-        var h = c.querySelector("h3");
-        var lbl = c.getAttribute("data-fx-label") || (h ? h.textContent : key);
-        svc.push([key, lbl, SELICON[key] || ICON.device]);
-      });
-      if (!svc.length) svc = [["managed", "Managed IT", ICON.hub], ["projects", "IT Projects", ICON.project]];
+      var svc = [["managed", "Managed IT", ICON.hub], ["projects", "IT Projects", ICON.project]];
       var hub2 = node({ x: sx2, y: sy2, hub: true, r: 30, glyph: ICON.support, label: "Techordia", depth: 1 });
       var sn = [];
       for (var q = 0; q < svc.length; q++) {
