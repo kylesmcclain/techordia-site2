@@ -163,20 +163,20 @@ strong { color: inherit; font-weight: 700; }
 /* ---- header ---- */
 .masthead {
   position: sticky; top: 0; z-index: 60;
-  background: color-mix(in srgb, var(--bg) 78%, transparent);
-  backdrop-filter: blur(14px) saturate(160%);
+  background: color-mix(in srgb, #353c49 92%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
   border-bottom: 1px solid var(--hairline);
 }
 .masthead__row { display: flex; align-items: center; justify-content: space-between; height: 74px; gap: 24px; }
 .brand { display: inline-flex; align-items: center; }
 .brand img { height: 34px; width: auto; max-width: min(220px, 46vw); object-fit: contain; }
-.mainnav { display: flex; align-items: center; gap: 6px; }
+.mainnav { display: flex; align-items: center; gap: 12px; }
 .mainnav a, .navitem > button {
   font-family: var(--font-display); font-weight: 500; font-size: .97rem; color: var(--ink-soft);
   padding: 9px 14px; border-radius: var(--r-sm); border: 0; background: none; cursor: pointer;
   display: inline-flex; align-items: center; gap: 6px; transition: color .18s, background .18s;
 }
-.mainnav a:hover, .navitem:hover > button, .mainnav a.is-active { color: #fff; background: rgba(255,255,255,.06); }
+.mainnav a:hover, .navitem:hover > button, .mainnav a.is-active { color: #fff; background: rgba(255,255,255,.12); }
 .navitem { position: relative; }
 .dropdown {
   position: absolute; top: calc(100% + 8px); left: 0; min-width: 264px;
@@ -204,7 +204,10 @@ strong { color: inherit; font-weight: 700; }
 .mainnav a.is-portal:hover { border-color: #6fe3da; background: rgba(24,198,194,.08); color: #fff; }
 [data-theme="light"] .mainnav a.is-portal { color: var(--blue-deep); border-color: rgba(47,123,246,.3); }
 [data-theme="light"] .mainnav a.is-portal:hover { background: rgba(47,123,246,.08); color: var(--blue-deep); }
-.header-cta { display: inline-flex; gap: 10px; align-items: center; }
+.header-cta { display: inline-flex; gap: 14px; align-items: center; }
+.header-cta .textlink { color: #6a96ff; }
+.header-cta .textlink:hover { color: #9db9ff; }
+[data-theme="light"] .header-cta .textlink { color: var(--blue-deep); }
 .navtoggle { display: none; }
 .theme-toggle {
   display: inline-grid;
