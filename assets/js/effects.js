@@ -1,7 +1,7 @@
 /* =========================================================================
    Techordia effect engine — ONE system, several layout modes.
    Renders inline SVG into [data-fx] containers and wires parallax + hover.
-   Modes: core | network | ownership | lanes | layers | timeline | selector | framework
+   Modes: core | lanes | timeline | selector | orbit | response
    ========================================================================= */
 (function () {
   "use strict";
@@ -76,8 +76,11 @@
     return wrap;
   }
   function edge(x1, y1, x2, y2, flow, soft) {
+    // bow perpendicular to the line so the path's bounding box is never
+    // zero-width/height (bbox gradients vanish on axis-aligned lines)
     var mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
-    var d = "M" + x1 + " " + y1 + " Q " + mx + " " + (my - 14) + " " + x2 + " " + y2;
+    var dx = x2 - x1, dy = y2 - y1, ln = Math.sqrt(dx * dx + dy * dy) || 1;
+    var d = "M" + x1 + " " + y1 + " Q " + (mx + (dy / ln) * 14) + " " + (my - (dx / ln) * 14) + " " + x2 + " " + y2;
     var frag = document.createDocumentFragment();
     var base = el("path", { class: "fx-edge" + (soft ? " fx-edge--soft" : ""), d: d });
     frag.appendChild(base);
@@ -91,11 +94,9 @@
     device: "M3 4h18v12H3V4Zm-1 14h22v2H2v-2Z",
     shield: "M12 2 4 5v6c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V5l-8-3Z",
     backup: "M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-2-4.9V10h5V3l-2.3 2.3A9 9 0 0 0 12 3Z",
-    vendor: "M4 7h16v3H4V7Zm0 5h7v6H4v-6Zm9 0h7v6h-7v-6ZM2 4h20v2H2V4Z",
     project: "M4 4h7v7H4V4Zm9 0h7v4h-7V4Zm0 6h7v10h-7V10Zm-9 3h7v7H4v-7Z",
     user: "M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5 0-9 2.5-9 6v2h18v-2c0-3.5-4-6-9-6Z",
     hub: "M12 2 3 7v10l9 5 9-5V7l-9-5Zm0 4.2L17 9v6l-5 2.8L7 15V9l5-2.8Z",
-    lock: "M6 10V8a6 6 0 1 1 12 0v2h1v12H5V10h1Zm2 0h8V8a4 4 0 1 0-8 0v2Z",
     mail: "M3 5h18v14H3V5Zm2 2v.4l7 4.6 7-4.6V7H5Zm14 3-7 4.6L5 10v7h14v-7Z"
   };
 
@@ -106,48 +107,10 @@
 
     if (mode === "core") { buildCore(box); return; }
 
-    if (mode === "network" || mode === "ownership") {
-      mk(560, 560);
-      var cx = 280, cy = 284, R = 196;
-      var domains = (mode === "ownership"
-        ? [["user", "Users", ICON.user], ["device", "Devices", ICON.device], ["m365", "Microsoft 365", ICON.m365],
-           ["shield", "Security", ICON.shield], ["backup", "Backups", ICON.backup], ["vendor", "Vendors", ICON.vendor],
-           ["support", "Support", ICON.support]]
-        : [["support", "Support", ICON.support], ["m365", "Microsoft 365", ICON.m365], ["device", "Devices", ICON.device],
-           ["shield", "Security", ICON.shield], ["backup", "Backups", ICON.backup], ["vendor", "Vendors", ICON.vendor],
-           ["project", "Projects", ICON.project]]);
-      var n = domains.length, start = -Math.PI / 2;
-      if (mode === "ownership") { // managed boundary ring + pulses
-        svg.appendChild(el("circle", { cx: cx, cy: cy, r: R + 34, class: "fx-ring", "stroke-dasharray": "2 7" }));
-        if (!reduce) for (var p = 0; p < 2; p++) { var pr = el("circle", { cx: cx, cy: cy, r: 60, class: "fx-pulse" }); pr.style.animationDelay = (p * 1.7) + "s"; svg.appendChild(pr); }
-        svg.appendChild(txt(cx, cy - R - 46, "MANAGED BY TECHORDIA", "fx-cap"));
-      }
-      var hub = node({ x: cx, y: cy, hub: true, r: 36, glyph: ICON.hub, label: mode === "network" ? "TECHORDIA" : "Techordia", sub: mode === "network" ? "" : "IT operating center", depth: 1, id: "hub" });
-      var nodes = [], edges = [];
-      for (var i = 0; i < n; i++) {
-        var a = start + (i / n) * Math.PI * 2;
-        var x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R;
-        var e = edge(cx, cy, x, y, true, false); svg.appendChild(e.frag);
-        var nd = node({ x: x, y: y, r: 19, glyph: domains[i][2], label: domains[i][1], depth: 2 + (i % 3), id: domains[i][0] });
-        nodes.push(nd); edges.push(e.base);
-        nd._edge = e.base; nd._flow = e.flow;
-      }
-      svg.appendChild(hub);
-      nodes.forEach(function (nd) { svg.appendChild(nd); });
-      wireHover(box, svg, hub, nodes);
-    }
-
-    else if (mode === "lanes") {
+    if (mode === "lanes") {
       mk(880, 540);
-      var managed = box.getAttribute("data-variant") === "managed";
       var midX = 440, lx = 150, rx = 730, ys = [150, 270, 390];
-      if (!managed) {
-        svg.appendChild(el("line", { x1: midX, y1: 70, x2: midX, y2: 470, class: "fx-ring", "stroke-dasharray": "2 8" }));
-        svg.appendChild(txt(lx, 96, "YOUR INTERNAL IT", "fx-cap"));
-        svg.appendChild(txt(rx, 96, "TECHORDIA", "fx-cap"));
-        svg.appendChild(txt(midX, 60, "SHARED VISIBILITY & ESCALATION", "fx-cap"));
-      }
-      var midNode = node({ x: midX, y: 270, hub: true, r: 30, glyph: ICON.hub, label: managed ? "TECHORDIA" : "Shared layer", sub: managed ? "one accountable owner" : "tickets · reporting · roadmap", depth: 1 });
+      var midNode = node({ x: midX, y: 270, hub: true, r: 30, glyph: ICON.hub, label: "TECHORDIA", sub: "one accountable owner", depth: 1 });
       var leftLabels = [["Day-to-day requests", ICON.user], ["Local knowledge", ICON.device], ["Business context", ICON.project]];
       var rightLabels = [["Monitoring & patching", ICON.support], ["Security & backup", ICON.shield], ["Escalation & projects", ICON.m365]];
       var paths = [];
@@ -170,37 +133,6 @@
           svg.appendChild(c);
         }
       });
-    }
-
-    else if (mode === "layers") {
-      mk(560, 560);
-      var ccx = 280, ccy = 284;
-      var rings = [["Access", 210], ["Email", 168], ["Endpoint", 126], ["Identity", 84]];
-      rings.forEach(function (rg, idx) {
-        svg.appendChild(el("circle", { cx: ccx, cy: ccy, r: rg[1], class: "fx-ring", "stroke-opacity": .9 - idx * .12 }));
-        svg.appendChild(txt(ccx, ccy - rg[1] + 17, rg[0].toUpperCase(), "fx-cap"));
-      });
-      // radar sweep
-      if (!reduce) {
-        var sweep = el("g", { class: "fx-radar" });
-        var grad = el("linearGradient", { id: "fxSweep", x1: "0", y1: "0", x2: "1", y2: "0" });
-        grad.appendChild(el("stop", { offset: "0", "stop-color": "#58e0d6", "stop-opacity": ".0" }));
-        grad.appendChild(el("stop", { offset: "1", "stop-color": "#58e0d6", "stop-opacity": ".22" }));
-        svg.appendChild(el("defs", null, grad));
-        sweep.appendChild(el("path", { d: "M" + ccx + " " + ccy + " L" + (ccx + 212) + " " + ccy + " A212 212 0 0 1 " + (ccx + 150) + " " + (ccy + 150) + " Z", fill: "url(#fxSweep)" }));
-        sweep.appendChild(el("line", { x1: ccx, y1: ccy, x2: ccx + 212, y2: ccy, class: "fx-scanline" }));
-        svg.appendChild(sweep);
-      }
-      // controls on rings
-      var ctrls = [["Identity", ICON.lock, 84, -90], ["Endpoint", ICON.device, 126, 20], ["Email", ICON.mail, 168, 135], ["Access", ICON.user, 210, 220], ["Backup", ICON.backup, 126, 250]];
-      var core = node({ x: ccx, y: ccy, hub: true, r: 30, glyph: ICON.shield, label: "Protected core", sub: "your business data", depth: 1 });
-      var cnodes = [];
-      ctrls.forEach(function (c) {
-        var a = c[3] * Math.PI / 180, x = ccx + Math.cos(a) * c[2], y = ccy + Math.sin(a) * c[2];
-        var nd = node({ x: x, y: y, r: 16, glyph: c[1], label: c[0], depth: 2 + (cnodes.length % 3) });
-        cnodes.push(nd);
-      });
-      svg.appendChild(core); cnodes.forEach(function (nd) { svg.appendChild(nd); });
     }
 
     else if (mode === "timeline") {
@@ -246,22 +178,48 @@
       wireSelector(box, sn);
     }
 
-    else if (mode === "framework") {
-      mk(520, 520);
-      var fx2 = 260, fy2 = 262;
-      var orbit = el("g", { class: reduce ? "" : "fx-orbit" });
-      orbit.appendChild(el("circle", { cx: fx2, cy: fy2, r: 150, class: "fx-ring", "stroke-dasharray": "2 9" }));
+    else if (mode === "orbit") {
+      // The Techordia Way: six qualities orbiting the hub
+      mk(520, 560);
+      var ox2 = 260, oy2 = 274, OR = 192;
+      var ring = el("g", { class: reduce ? "" : "fx-orbit" });
+      ring.appendChild(el("circle", { cx: ox2, cy: oy2, r: 134, class: "fx-ring", "stroke-dasharray": "2 9" }));
       [0, 1, 2, 3].forEach(function (i) {
-        var a = -Math.PI / 2 + i * Math.PI / 2, x = fx2 + Math.cos(a) * 150, y = fy2 + Math.sin(a) * 150;
-        orbit.appendChild(el("circle", { cx: x, cy: y, r: 8, class: "fx-dot fx-dot--accent" }));
+        var a = -Math.PI / 2 + i * Math.PI / 2, x = ox2 + Math.cos(a) * 134, y = oy2 + Math.sin(a) * 134;
+        ring.appendChild(el("circle", { cx: x, cy: y, r: 5, class: "fx-dot fx-dot--accent" }));
       });
-      svg.appendChild(orbit);
-      var ho = node({ x: fx2, y: fy2, hub: true, r: 34, glyph: ICON.hub, depth: 1 });
-      svg.appendChild(ho);
-      var badge = el("g");
-      badge.appendChild(el("rect", { x: fx2 - 96, y: fy2 + 92, width: 192, height: 40, rx: 12, class: "fx-soon" }));
-      badge.appendChild(txt(fx2, fy2 + 117, "FRAMEWORK COMING SOON", "fx-soon-t"));
-      svg.appendChild(badge);
+      svg.appendChild(ring);
+      var qualities = [
+        ["Thorough", ICON.project], ["Accountable", ICON.m365], ["Pride", ICON.user],
+        ["Commitment", ICON.support], ["Quality", ICON.hub], ["Integrity", ICON.shield]
+      ];
+      var oHub = node({ x: ox2, y: oy2, hub: true, r: 32, glyph: ICON.hub, label: "TECHORDIA", sub: "the way we work", depth: 1 });
+      var qNodes = [];
+      qualities.forEach(function (q, i) {
+        var a = -Math.PI / 2 + (i / qualities.length) * Math.PI * 2;
+        var x = ox2 + Math.cos(a) * OR, y = oy2 + Math.sin(a) * OR;
+        var e = edge(ox2, oy2, x, y, true, false); svg.appendChild(e.frag);
+        var nd = node({ x: x, y: y, r: 17, glyph: q[1], label: q[0], depth: 2 + (i % 3) });
+        nd._edge = e.base; nd._flow = e.flow;
+        qNodes.push(nd);
+      });
+      svg.appendChild(oHub);
+      qNodes.forEach(function (nd) { svg.appendChild(nd); });
+      wireHover(box, svg, oHub, qNodes);
+    }
+
+    else if (mode === "response") {
+      // Contact: you call, an engineer answers
+      mk(560, 340);
+      var e2 = edge(150, 168, 404, 168, false, false);
+      svg.appendChild(e2.frag);
+      if (!reduce) {
+        var fIn = el("path", { class: "fx-flow", d: e2.d });
+        var fOut = el("path", { class: "fx-flow fx-flow--rev", d: e2.d });
+        svg.appendChild(fIn); svg.appendChild(fOut);
+      }
+      svg.appendChild(node({ x: 120, y: 168, r: 22, glyph: ICON.user, label: "You", depth: 2 }));
+      svg.appendChild(node({ x: 440, y: 168, hub: true, r: 30, glyph: ICON.support, label: "TECHORDIA", sub: "an engineer answers", depth: 1 }));
     }
   }
 
