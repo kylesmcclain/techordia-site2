@@ -194,7 +194,7 @@ strong { color: inherit; font-weight: 700; }
 .dropdown--svc a { display: block; font-family: var(--font-display); font-weight: 500; font-size: .95rem;
   color: var(--ink); padding: 9px 13px; }
 /* keep anchored sections clear of the sticky header on jump */
-.svc[id], #whats-inside { scroll-margin-top: 92px; }
+main [id] { scroll-margin-top: 92px; }
 /* client portal link: quiet pill, clearly "for existing clients" */
 .mainnav a.is-portal {
   border: 1px solid var(--hairline-strong); border-radius: var(--pill);
