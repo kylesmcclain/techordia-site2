@@ -12,14 +12,11 @@ edges, and motion — expressed in different layout *modes*:
 | Page | Mode | What it communicates |
 |------|------|----------------------|
 | Home | `core` | The Techordia command core: a circuit board where requests flow in, fixes flow out, and live status chips pop as work completes |
-| All Services | `selector` | Interactive service map (hover a card → its path lights up); nodes are built from the cards on the page |
-| Managed IT Services | `lanes` | Every layer of a client's IT connecting through Techordia as one accountable owner |
-| Help Desk & Support | `response` | You call, an engineer answers — signals flowing both ways |
+| Services | `selector` | Interactive model selector (hover a card → its path lights up) |
+| Managed IT | `lanes` | Every layer of a client's IT connecting through Techordia as one accountable owner |
 | IT Projects | `timeline` | Staged delivery: scope → prepare → cutover → test → handoff |
 | The Techordia Way | `orbit` | The six Way qualities orbiting the Techordia hub |
 | Contact | `response` | You call, an engineer answers — signals flowing both ways |
-
-(Cybersecurity & Compliance is deliberately content-led, with no effect stage.)
 
 Motion is purposeful: subtle mouse parallax (depth), edge flow, hover
 cross-highlighting, and restrained scroll reveals. All animation respects
@@ -37,22 +34,10 @@ Hand-built static HTML/CSS/vanilla JS — no framework, no build step — so it 
 cleanly to GitHub Pages' multi-URL structure.
 
 ```
-index.html  services.html  managed-it.html  helpdesk-support.html
-cybersecurity.html  it-projects.html  techordia-way.html  contact.html  404.html
+index.html  services.html  managed-it.html  it-projects.html
+techordia-way.html  contact.html  404.html
 assets/css/{app,effects}.css   assets/js/{site,effects}.js   assets/img/*
 ```
-
-### Site structure
-
-Services live on dedicated pages (one per pillar), all reachable from the
-Services menu and the `services.html` hub:
-
-- `managed-it.html` — the flagship flat-fee plan (with `#cloud`, `#strategy`,
-  `#vendors` sections in-page)
-- `helpdesk-support.html` — the support experience
-- `cybersecurity.html` — security, `#compliance`, `#backup`, `#training`,
-  `#cameras`
-- `it-projects.html` — one-time projects
 
 ## Notes
 
