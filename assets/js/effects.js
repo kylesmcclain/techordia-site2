@@ -1,7 +1,7 @@
 /* =========================================================================
    Techordia effect engine — ONE system, several layout modes.
    Renders inline SVG into [data-fx] containers and wires parallax + hover.
-   Modes: globe | network | ownership | lanes | layers | timeline | selector | framework
+   Modes: core | network | ownership | lanes | layers | timeline | selector | framework
    ========================================================================= */
 (function () {
   "use strict";
@@ -104,7 +104,7 @@
     var svg, vb;
     function mk(w, h) { vb = [w, h]; svg = el("svg", { viewBox: "0 0 " + w + " " + h, role: "img", "aria-label": box.getAttribute("data-label") || "Techordia operating network" }); box.appendChild(svg); return svg; }
 
-    if (mode === "globe") { buildGlobe(box); return; }
+    if (mode === "core") { buildCore(box); return; }
 
     if (mode === "network" || mode === "ownership") {
       mk(560, 560);
@@ -265,193 +265,111 @@
     }
   }
 
-  /* ---- Techordia globe via globe.gl (real 3D WebGL Earth) ----------------
-     Built on the open-source globe.gl library with public-domain Natural
-     Earth country data (dotted continents) and Techordia's own home base in
-     Alameda + arcs to client cities, in brand colours. Falls back to the
-     canvas globe below if WebGL or the CDN is unavailable.
+  /* ---- Techordia "command core" hero (canvas, fully hand-authored) -------
+     A Techordia chip wired into a circuit board. Blue signals travel inward
+     (requests coming in), teal signals travel outward (work going out), and
+     live status chips pop at the pads as jobs complete: threats blocked,
+     backups verified, tickets closed. No libraries, theme-aware, HiDPI,
+     reduced-motion safe.
      ----------------------------------------------------------------------- */
-  var _ggl = { loading: false, ready: false, cbs: [] };
-  function loadGlobeGL(cb) {
-    if (_ggl.ready && window.Globe) return cb(true);
-    _ggl.cbs.push(cb);
-    if (_ggl.loading) return;
-    _ggl.loading = true;
-    var s = document.createElement("script");
-    s.src = "assets/js/vendor/globe.gl.min.js";
-    s.async = true;
-    s.onload = function () { _ggl.ready = !!window.Globe; _ggl.cbs.splice(0).forEach(function (f) { f(_ggl.ready); }); };
-    s.onerror = function () { _ggl.loading = false; _ggl.cbs.splice(0).forEach(function (f) { f(false); }); };
-    document.head.appendChild(s);
-  }
-  var _geo = null;
-  function loadCountries() {
-    if (_geo) return _geo;
-    var urls = [
-      "assets/data/ne_110m_admin_0_countries.geojson",
-      "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@master/geojson/ne_110m_admin_0_countries.geojson"
-    ];
-    _geo = urls.reduce(function (p, url) {
-      return p.then(function (g) { return g || fetch(url).then(function (r) { return r.json(); }).catch(function () { return null; }); });
-    }, Promise.resolve(null));
-    return _geo;
-  }
-
-  function buildGlobe(box) {
-    loadGlobeGL(function (ok) {
-      if (!ok || !window.Globe) { canvasGlobe(box); return; }
-      try { initGlobeGL(box); } catch (e) { console.warn("globe.gl init failed", e); canvasGlobe(box); }
-    });
-  }
-
-  function initGlobeGL(box) {
-    function isLight() { return document.documentElement.getAttribute("data-theme") === "light"; }
-    var HOME = { lat: 37.77, lng: -122.24, home: true };
-    var CITIES = [
-      { lat: 40.71, lng: -74.0 }, { lat: 43.7, lng: -79.4 }, { lat: 51.5, lng: -0.12 },
-      { lat: 52.52, lng: 13.4 }, { lat: -23.5, lng: -46.6 }, { lat: -33.9, lng: 18.4 },
-      { lat: 25.2, lng: 55.3 }, { lat: 19.08, lng: 72.88 }, { lat: 1.35, lng: 103.82 },
-      { lat: 35.68, lng: 139.7 }, { lat: -33.87, lng: 151.21 }
-    ];
-    var arcs = CITIES.map(function (c) { return { startLat: HOME.lat, startLng: HOME.lng, endLat: c.lat, endLng: c.lng }; });
-    var sz = Math.max(220, box.clientWidth || box.getBoundingClientRect().width || 460);
-
-    function darkTex() { var t = document.createElement("canvas"); t.width = t.height = 2; var x = t.getContext("2d"); x.fillStyle = isLight() ? "#d3e2f2" : "#0c1e36"; x.fillRect(0, 0, 2, 2); return t.toDataURL(); }
-
-    var world = window.Globe({ rendererConfig: { preserveDrawingBuffer: true, antialias: true, alpha: true }, waitForGlobeReady: false, animateIn: false })(box)
-      .width(sz).height(sz)
-      .backgroundColor("rgba(0,0,0,0)")
-      .globeImageUrl(darkTex())
-      .showAtmosphere(true).atmosphereColor(isLight() ? "#2f7bf6" : "#46a6ff").atmosphereAltitude(0.18)
-      .arcsData(arcs)
-      .arcColor(function () { return ["rgba(56,200,225,0)", "rgba(120,236,236,0.95)", "rgba(56,200,225,0)"]; })
-      .arcStroke(0.45).arcAltitudeAutoScale(0.26)
-      .arcDashLength(0.4).arcDashGap(0.7).arcDashInitialGap(function () { return Math.random(); }).arcDashAnimateTime(reduce ? 0 : 2600)
-      .pointsData([HOME].concat(CITIES)).pointLat("lat").pointLng("lng")
-      .pointColor(function (d) { return d.home ? "#aef0ff" : "#6fe3da"; })
-      .pointAltitude(0.012).pointRadius(function (d) { return d.home ? 0.62 : 0.34; })
-      .ringsData([HOME]).ringLat("lat").ringLng("lng")
-      .ringColor(function () { return "#8fe9f2"; })
-      .ringMaxRadius(3.6).ringPropagationSpeed(1.7).ringRepeatPeriod(reduce ? 4000 : 1100);
-
-    loadCountries().then(function (geo) {
-      if (!geo || !geo.features) return;
-      world.hexPolygonsData(geo.features).hexPolygonResolution(4).hexPolygonMargin(0.32)
-        .hexPolygonUseDots(true).hexPolygonAltitude(0.006)
-        .hexPolygonColor(function () { return isLight() ? "rgba(28,96,188,0.92)" : "rgba(120,210,250,0.96)"; });
-    });
-
-    world.pointOfView({ lat: 16, lng: -95, altitude: 1.5 }, 0);
-    var ctr = world.controls();
-    ctr.enableZoom = false; ctr.enablePan = false; ctr.autoRotate = !reduce; ctr.autoRotateSpeed = 0.3;
-
-    function onResize() { var bw = Math.max(220, box.clientWidth || sz); world.width(bw).height(bw); }
-    if (window.ResizeObserver) { try { new ResizeObserver(onResize).observe(box); } catch (e) {} }
-    else window.addEventListener("resize", onResize);
-
-    try {
-      new MutationObserver(function () {
-        var L = isLight();
-        world.globeImageUrl(darkTex()).atmosphereColor(L ? "#2f7bf6" : "#46a6ff");
-        world.hexPolygonColor(function () { return L ? "rgba(30,98,190,0.85)" : "rgba(108,200,245,0.92)"; });
-      }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    } catch (e) {}
-  }
-
-  /* ---- canvas globe (fallback when globe.gl/WebGL is unavailable) --------
-     A rotating dotted Earth rendered in 2D canvas — hand-authored geography
-     and own great-circle maths. Theme-aware, reduced-motion safe.
-     ----------------------------------------------------------------------- */
-  function canvasGlobe(box) {
+  function buildCore(box) {
     var canvas = document.createElement("canvas");
-    canvas.className = "fx-globe";
+    canvas.className = "fx-core";
     canvas.setAttribute("role", "img");
     canvas.setAttribute("aria-label", box.getAttribute("data-label") ||
-      "A rotating globe with Techordia in Alameda, California and lines reaching out to client locations across the world");
+      "The Techordia command core: a circuit board where requests flow in and finished work flows out");
     box.appendChild(canvas);
     var ctx = canvas.getContext("2d");
-    var DEG = Math.PI / 180;
-    function ll(lat, lng) { var la = lat * DEG, lo = lng * DEG, c = Math.cos(la); return [c * Math.cos(lo), Math.sin(la), c * Math.sin(lo)]; }
 
-    // continent polygons (hand-authored simplified geography, [lat,lng]) --
-    // used as a land mask: a dot is drawn wherever the surface falls on land.
-    var POLY = [
-      /* North America */[[71,-156],[68,-165],[65,-166],[60,-164],[58,-153],[55,-131],[52,-128],[48,-125],[42,-124],[34,-120],[30,-115],[23,-110],[20,-106],[18,-103],[15,-96],[13,-91],[8,-83],[8,-78],[12,-83],[16,-88],[18,-94],[20,-97],[26,-97],[29,-94],[30,-89],[29,-83],[25,-81],[31,-81],[35,-76],[40,-74],[44,-67],[47,-64],[50,-58],[53,-56],[56,-61],[60,-65],[63,-78],[66,-72],[69,-78],[72,-95],[74,-115],[72,-128],[70,-141],[71,-156]],
-      /* Greenland */[[60,-45],[64,-40],[70,-22],[76,-19],[81,-25],[82,-38],[78,-58],[72,-55],[66,-52],[60,-45]],
-      /* South America */[[12,-71],[10,-62],[5,-52],[0,-49],[-5,-35],[-9,-35],[-15,-39],[-23,-43],[-30,-50],[-35,-54],[-41,-62],[-46,-66],[-52,-69],[-55,-67],[-50,-73],[-42,-73],[-33,-72],[-24,-70],[-16,-74],[-8,-79],[-2,-80],[4,-77],[9,-77],[12,-71]],
-      /* Africa + Arabia */[[37,-6],[37,10],[33,12],[31,20],[31,32],[24,35],[15,40],[12,44],[12,51],[6,49],[2,46],[-5,40],[-12,40],[-18,37],[-25,34],[-34,26],[-35,19],[-29,16],[-22,14],[-15,12],[-8,13],[-1,9],[4,8],[5,1],[5,-4],[8,-13],[14,-17],[20,-17],[26,-15],[31,-10],[35,-6],[37,-6]],
-      /* Europe */[[36,-6],[38,-9],[43,-9],[47,-4],[49,-1],[51,2],[53,5],[55,8],[58,5],[60,5],[63,8],[66,12],[70,18],[71,26],[67,30],[60,28],[57,22],[55,21],[54,12],[52,3],[49,-1],[47,-2],[44,-1],[43,4],[44,8],[41,17],[40,19],[42,28],[46,30],[45,37],[44,39],[40,28],[38,22],[36,-6]],
-      /* Asia */[[40,28],[45,35],[44,50],[37,49],[30,48],[26,56],[25,62],[23,67],[16,73],[8,77],[12,80],[19,85],[22,92],[16,95],[9,99],[10,105],[14,109],[21,108],[23,117],[30,122],[37,122],[40,124],[43,130],[47,138],[52,141],[59,150],[62,160],[66,170],[70,178],[73,140],[77,110],[79,95],[80,75],[75,68],[68,55],[64,48],[57,38],[50,32],[44,30],[40,28]],
-      /* Australia */[[-11,131],[-12,137],[-15,141],[-13,143],[-18,146],[-25,153],[-34,151],[-38,146],[-38,140],[-35,137],[-32,131],[-33,123],[-32,116],[-26,114],[-20,117],[-15,124],[-12,130],[-11,131]],
-      /* Japan */[[31,131],[34,135],[36,140],[40,142],[42,140],[37,137],[34,132],[31,131]],
-      /* UK + Ireland */[[50,-5],[53,-3],[56,-6],[58,-4],[57,-1],[53,1],[51,1],[50,-5]],
-      /* New Zealand */[[-35,173],[-39,177],[-42,174],[-46,168],[-44,170],[-40,172],[-35,173]],
-      /* Madagascar */[[-12,49],[-16,50],[-23,47],[-25,45],[-20,44],[-14,47],[-12,49]]
-    ];
-    function pip(lat, lng, poly) {
-      var inside = false;
-      for (var a = 0, b = poly.length - 1; a < poly.length; b = a++) {
-        var yi = poly[a][0], xi = poly[a][1], yj = poly[b][0], xj = poly[b][1];
-        if (((yi > lat) !== (yj > lat)) && (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi)) inside = !inside;
+    // design space is 560x560; everything scales from there -----------------
+    var D = 560, CXC = 280, CHIP = 64, CR = 18;   // chip half-size + corner radius
+    var TRACES = [
+      [[344, 250], [420, 250], [455, 215], [505, 215]],
+      [[344, 280], [500, 280]],
+      [[344, 310], [410, 310], [445, 345], [505, 345]],
+      [[216, 250], [140, 250], [105, 215], [55, 215]],
+      [[216, 280], [60, 280]],
+      [[216, 310], [150, 310], [115, 345], [55, 345]],
+      [[250, 216], [250, 150], [215, 115], [215, 62]],
+      [[280, 216], [280, 70]],
+      [[310, 216], [310, 150], [345, 115], [345, 58]],
+      [[250, 344], [250, 410], [215, 445], [215, 498]],
+      [[280, 344], [280, 492]],
+      [[310, 344], [310, 410], [345, 445], [345, 502]]
+    ].map(function (pts) {
+      var segs = [], L = 0;
+      for (var i = 1; i < pts.length; i++) {
+        var dx = pts[i][0] - pts[i - 1][0], dy = pts[i][1] - pts[i - 1][1], l = Math.sqrt(dx * dx + dy * dy);
+        segs.push({ ax: pts[i - 1][0], ay: pts[i - 1][1], dx: dx, dy: dy, l: l, off: L }); L += l;
       }
-      return inside;
-    }
-    function onLand(lat, lng) { for (var q = 0; q < POLY.length; q++) if (pip(lat, lng, POLY[q])) return true; return false; }
-    // land dot field: one dot per ~2.8 deg of land, evenly spaced toward poles
-    var LAND = [];
-    for (var dlat = -78; dlat <= 80; dlat += 2.8) {
-      var stepLng = 2.8 / Math.max(0.22, Math.cos(dlat * DEG));
-      for (var dlng = -180; dlng < 180; dlng += stepLng) if (onLand(dlat, dlng)) LAND.push(ll(dlat, dlng));
+      return { pts: pts, segs: segs, L: L, pad: { x: pts[pts.length - 1][0], y: pts[pts.length - 1][1], flash: -1e9 } };
+    });
+    function pointAt(tr, t) {
+      var d = Math.max(0, Math.min(1, t)) * tr.L, segs = tr.segs;
+      for (var i = 0; i < segs.length; i++) {
+        var s = segs[i];
+        if (d <= s.off + s.l || i === segs.length - 1) {
+          var k = s.l ? (d - s.off) / s.l : 0;
+          return { x: s.ax + s.dx * k, y: s.ay + s.dy * k };
+        }
+      }
     }
 
-    // Techordia home (Alameda, CA) + client locations worldwide ----------
-    var HOME = ll(37.77, -122.24);
-    var CLIENTS = [
-      [40.7, -74.0], [51.5, -0.12], [-23.5, -46.6], [-33.9, 18.4],
-      [25.2, 55.3], [1.35, 103.8], [35.7, 139.7], [-33.9, 151.2]
-    ].map(function (c) { return ll(c[0], c[1]); });
+    // the work Techordia quietly gets done, cycled through the status chips
+    var MSGS = [
+      [ICON.shield, "Threat blocked"],
+      [ICON.backup, "Backup verified"],
+      [ICON.support, "Ticket closed · 4 min"],
+      [ICON.device, "Patches deployed"],
+      [ICON.mail, "Phishing quarantined"],
+      [ICON.m365, "Microsoft 365 healthy"]
+    ];
 
     var P = {};
     function setPalette() {
       var light = document.documentElement.getAttribute("data-theme") === "light";
       P = light
-        ? { grid: "70,120,180", land: "26,95,175", arc: [30, 140, 195], arcHi: [16, 110, 150], glow: "40,150,200",
-            rim: "30,98,190", haloA: .08, core: "30,120,180", coreGlyph: "#ffffff", pillBg: "rgba(255,255,255,.95)",
-            pillTx: "#125a86", spark: [20, 120, 150], ping: [30, 130, 180] }
-        : { grid: "90,140,205", land: "120,190,240", arc: [40, 214, 205], arcHi: [174, 240, 255], glow: "50,165,215",
-            rim: "120,170,230", haloA: .15, core: "120,225,245", coreGlyph: "#06121f", pillBg: "rgba(8,16,30,.82)",
-            pillTx: "#9fefff", spark: [205, 246, 255], ping: [150, 230, 255] };
+        ? { grid: "rgba(47,123,246,0.10)", trace: "rgba(47,123,246,0.28)", via: "rgba(47,123,246,0.40)",
+            padRing: "rgba(47,123,246,0.50)", padDot: "#0fa39b", glow: "47,123,246", glowA: .10,
+            out: [13, 158, 150], inn: [47, 123, 246],
+            chipA: "#ffffff", chipB: "#e9f1fd", chipEdge: "rgba(47,123,246,0.38)", chipInner: "rgba(47,123,246,0.14)",
+            pin: "rgba(47,123,246,0.45)", bracket: "rgba(12,143,136,0.75)", glyphC: "#2f7bf6",
+            label: "#16273f", sub: "#5f728c",
+            pillBg: "rgba(255,255,255,0.96)", pillEdge: "rgba(47,123,246,0.25)", pillTx: "#1d3a5f", pillIc: "#0c8f88" }
+        : { grid: "rgba(120,170,230,0.07)", trace: "rgba(96,150,220,0.30)", via: "rgba(120,180,240,0.42)",
+            padRing: "rgba(130,200,250,0.55)", padDot: "#6fe3da", glow: "50,165,215", glowA: .16,
+            out: [111, 227, 218], inn: [111, 182, 255],
+            chipA: "#13263f", chipB: "#0b1626", chipEdge: "rgba(125,175,235,0.5)", chipInner: "rgba(125,175,235,0.16)",
+            pin: "rgba(110,165,230,0.55)", bracket: "rgba(111,227,218,0.7)", glyphC: "#9fefff",
+            label: "#e6f1ff", sub: "#8fa6c4",
+            pillBg: "rgba(8,16,30,0.86)", pillEdge: "rgba(120,190,240,0.35)", pillTx: "#cfe8ff", pillIc: "#6fe3da" };
     }
     setPalette();
 
-    var W = 1, H = 1, cx = 0, cy = 0, R = 0, nodeR = 12, fs = 12, dpr = 1, M = 1;
+    var W = 1, H = 1, sc = 1, ox = 0, oy = 0, dpr = 1;
     function resize() {
       var r = box.getBoundingClientRect();
-      W = Math.max(1, r.width); H = Math.max(1, r.height); M = Math.min(W, H);
+      W = Math.max(1, r.width); H = Math.max(1, r.height);
       dpr = Math.min(2, window.devicePixelRatio || 1);
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
       canvas.style.width = W + "px"; canvas.style.height = H + "px";
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      cx = W / 2; cy = H / 2; R = M * 0.38;
-      nodeR = Math.max(7, Math.min(12, M * 0.024));
-      fs = Math.max(8.5, Math.min(12, M * 0.025));
+      var M = Math.min(W, H);
+      sc = M / D; ox = (W - M) / 2; oy = (H - M) / 2;
+      if (!raf) draw(lastNow);
     }
-    resize();
-    if (window.ResizeObserver) { try { new ResizeObserver(resize).observe(box); } catch (e) {} }
-    else window.addEventListener("resize", resize);
 
-    // pointer parallax tilt ----------------------------------------------
-    var tiltX = 0.40, tiltY = 0, curX = 0.40, curY = 0;       // +tilt centres the view on N. America
+    // pointer parallax: the whole board leans gently toward the cursor ------
+    var tiltX = 0, tiltY = 0, curX = 0, curY = 0;
     if (!reduce) {
       box.addEventListener("pointermove", function (e) {
         var r = box.getBoundingClientRect();
-        tiltY = ((e.clientX - r.left) / r.width - .5) * 0.4;
-        tiltX = 0.40 + ((e.clientY - r.top) / r.height - .5) * 0.3;
+        tiltX = ((e.clientX - r.left) / r.width - .5) * 14;
+        tiltY = ((e.clientY - r.top) / r.height - .5) * 14;
       });
-      box.addEventListener("pointerleave", function () { tiltX = 0.40; tiltY = 0; });
+      box.addEventListener("pointerleave", function () { tiltX = 0; tiltY = 0; });
     }
 
-    function rgb(c, al) { return "rgba(" + (c[0] | 0) + "," + (c[1] | 0) + "," + (c[2] | 0) + "," + al + ")"; }
+    function rgb(c, al) { return "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + al + ")"; }
     function rrect(x, y, w, h, r) {
       ctx.beginPath();
       ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
@@ -462,120 +380,187 @@
       ctx.save(); ctx.translate(x - 12 * s, y - 12 * s); ctx.scale(s, s);
       ctx.fillStyle = color; ctx.fill(new Path2D(d)); ctx.restore();
     }
-    function slerp(a, b, t) {
-      var d = a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; d = d < -1 ? -1 : d > 1 ? 1 : d;
-      var om = Math.acos(d); if (om < 1e-4) return [a[0], a[1], a[2]];
-      var s = Math.sin(om), w1 = Math.sin((1 - t) * om) / s, w2 = Math.sin(t * om) / s;
-      return [a[0] * w1 + b[0] * w2, a[1] * w1 + b[1] * w2, a[2] * w1 + b[2] * w2];
+
+    // live state -------------------------------------------------------------
+    var pulses = [], chips = [], msgIdx = 0, traceIdx = 0;
+    var lastSpawn = 0, lastChip = -1e9, coreFlash = -1e9, lastNow = 0;
+    var SPEED = 130;                                  // px per second along a trace
+    function spawn(t0) {
+      traceIdx = (traceIdx + 5) % TRACES.length;      // 5 is coprime with 12 -> visits every trace
+      pulses.push({ tr: TRACES[traceIdx], t: t0 || 0, out: Math.random() > 0.35 });
     }
 
-    var ANG0 = 2.5, ang = 2.5;                  // ANG0 centres Alameda's longitude on the front
+    function pill(cx2, y, icon, label, alpha) {
+      ctx.font = "600 12.5px 'Space Grotesk', system-ui, sans-serif";
+      ctx.textAlign = "left"; ctx.textBaseline = "middle";
+      var tw = ctx.measureText(label).width, w = tw + 44, h = 27;
+      var x = Math.max(12, Math.min(D - 12 - w, cx2 - w / 2));
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = P.pillBg; rrect(x, y - h / 2, w, h, h / 2); ctx.fill();
+      ctx.strokeStyle = P.pillEdge; ctx.lineWidth = 1; ctx.stroke();
+      glyph(icon, x + 19, y, 13, P.pillIc);
+      ctx.fillStyle = P.pillTx; ctx.fillText(label, x + 31, y + 0.5);
+      ctx.globalAlpha = 1;
+    }
+
     function draw(now) {
-      ctx.clearRect(0, 0, W, H);
-      var cosY = Math.cos(ang + curY), sinY = Math.sin(ang + curY), cosX = Math.cos(curX), sinX = Math.sin(curX);
-      // project a unit vector (optionally lifted by altitude scale) to screen
-      function project(v, scale) {
-        var x1 = v[0] * cosY + v[2] * sinY, z1 = -v[0] * sinY + v[2] * cosY;
-        var y2 = v[1] * cosX - z1 * sinX, z2 = v[1] * sinX + z1 * cosX, s = scale || 1;
-        return { sx: cx + x1 * R * s, sy: cy - y2 * R * s, z: z2 };
-      }
+      lastNow = now;
+      ctx.setTransform(dpr * sc, 0, 0, dpr * sc, dpr * (ox + curX * sc), dpr * (oy + curY * sc));
+      ctx.clearRect(-ox / sc - 20, -oy / sc - 20, (W / sc) + 40, (H / sc) + 40);
+      ctx.lineCap = "round"; ctx.lineJoin = "round";
 
-      // soft halo + solid ocean disc so the planet reads as a body
-      var halo = ctx.createRadialGradient(cx, cy, R * 0.2, cx, cy, R * 1.7);
-      halo.addColorStop(0, "rgba(" + P.glow + "," + P.haloA + ")"); halo.addColorStop(1, "rgba(" + P.glow + ",0)");
-      ctx.fillStyle = halo; ctx.fillRect(0, 0, W, H);
-      var ocean = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.3, R * 0.2, cx, cy, R);
-      ocean.addColorStop(0, "rgba(" + P.glow + ",0.10)"); ocean.addColorStop(1, "rgba(" + P.glow + ",0.02)");
-      ctx.fillStyle = ocean; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
-
-      // --- land dots (front hemisphere only -> a solid spinning planet) ---
-      ctx.lineCap = "round";
-      for (var d = 0; d < LAND.length; d++) {
-        var lp = project(LAND[d]);
-        if (lp.z <= 0.05) continue;
-        var fr = (lp.z + 1) / 2; fr = (fr - 0.5) * 2;            // 0 at limb .. 1 at centre
-        ctx.fillStyle = "rgba(" + P.land + "," + (0.16 + 0.76 * fr).toFixed(3) + ")";
-        ctx.beginPath(); ctx.arc(lp.sx, lp.sy, 0.6 + 1.1 * fr, 0, Math.PI * 2); ctx.fill();
+      // board: faint dot grid + soft glow behind the chip
+      ctx.fillStyle = P.grid;
+      for (var gx = 28; gx < D; gx += 28) for (var gy = 28; gy < D; gy += 28) {
+        if (Math.abs(gx - CXC) < CHIP && Math.abs(gy - CXC) < CHIP) continue;
+        ctx.fillRect(gx - 1, gy - 1, 2, 2);
       }
-      // crisp rim
-      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(" + P.rim + ",0.34)"; ctx.lineWidth = 1.1; ctx.stroke();
+      var flash = Math.max(0, 1 - (now - coreFlash) / 700);
+      var breathe = reduce ? 0 : 0.05 * Math.sin(now / 1200);
+      var glow = ctx.createRadialGradient(CXC, CXC, CHIP * 0.5, CXC, CXC, 230);
+      glow.addColorStop(0, "rgba(" + P.glow + "," + (P.glowA + breathe + flash * 0.14).toFixed(3) + ")");
+      glow.addColorStop(1, "rgba(" + P.glow + ",0)");
+      ctx.fillStyle = glow; ctx.fillRect(0, 0, D, D);
 
-      // --- highlighted arcs: Alameda -> each client location ---
-      var hp = project(HOME);
-      for (var i = 0; i < CLIENTS.length; i++) {
-        var cl = CLIENTS[i], SEG = 30, pr = null, prF = 0;
-        // build + stroke arc with great-circle + altitude lift
-        for (var sIdx = 0; sIdx <= SEG; sIdx++) {
-          var t = sIdx / SEG, v = slerp(HOME, cl, t), alt = 1 + 0.16 * Math.sin(Math.PI * t);
-          var cur2 = project(v, alt), fF = (cur2.z + 1) / 2;
-          if (pr && (fF > 0.34 || prF > 0.34)) {
-            var a2 = Math.max(0, Math.min(1, ((fF + prF) / 2 - 0.32) / 0.5));
-            ctx.strokeStyle = rgb(P.arc, (0.10 + 0.16 * a2).toFixed(3)); ctx.lineWidth = 5;   // glow
-            ctx.beginPath(); ctx.moveTo(pr.sx, pr.sy); ctx.lineTo(cur2.sx, cur2.sy); ctx.stroke();
-            ctx.strokeStyle = rgb(P.arcHi, (0.25 + 0.7 * a2).toFixed(3)); ctx.lineWidth = 1.9; // bold core
-            ctx.beginPath(); ctx.moveTo(pr.sx, pr.sy); ctx.lineTo(cur2.sx, cur2.sy); ctx.stroke();
-          }
-          pr = cur2; prF = fF;
+      // traces, bend vias, endpoint pads
+      ctx.strokeStyle = P.trace; ctx.lineWidth = 1.6;
+      TRACES.forEach(function (tr) {
+        ctx.beginPath(); ctx.moveTo(tr.pts[0][0], tr.pts[0][1]);
+        for (var i = 1; i < tr.pts.length; i++) ctx.lineTo(tr.pts[i][0], tr.pts[i][1]);
+        ctx.stroke();
+      });
+      ctx.fillStyle = P.via;
+      TRACES.forEach(function (tr) {
+        for (var i = 1; i < tr.pts.length - 1; i++) {
+          ctx.beginPath(); ctx.arc(tr.pts[i][0], tr.pts[i][1], 2, 0, Math.PI * 2); ctx.fill();
         }
-        // travelling signal + destination ping
-        if (!reduce) {
-          var tt = (now / 2600 + i * 0.13) % 1, sv = slerp(HOME, cl, tt), salt = 1 + 0.16 * Math.sin(Math.PI * tt), sp = project(sv, salt);
-          if ((sp.z + 1) / 2 > 0.42) { ctx.fillStyle = rgb(P.spark, 0.95); ctx.beginPath(); ctx.arc(sp.sx, sp.sy, 2.3, 0, Math.PI * 2); ctx.fill(); }
+      });
+      TRACES.forEach(function (tr) {
+        var p = tr.pad, k = Math.max(0, 1 - (now - p.flash) / 900);
+        if (k > 0) {
+          ctx.beginPath(); ctx.arc(p.x, p.y, 7 + 16 * (1 - k), 0, Math.PI * 2);
+          ctx.strokeStyle = rgb(P.out, (0.5 * k).toFixed(3)); ctx.lineWidth = 1.4; ctx.stroke();
         }
-        var dp = project(cl), df = (dp.z + 1) / 2;
-        if (df > 0.5) {
-          var pulse = reduce ? 0.5 : 0.5 + 0.5 * Math.sin(now / 600 + i);
-          var gg = ctx.createRadialGradient(dp.sx, dp.sy, 0, dp.sx, dp.sy, 4 + 4 * pulse);
-          gg.addColorStop(0, rgb(P.ping, 0.5 * (df - 0.5) * 2)); gg.addColorStop(1, rgb(P.ping, 0));
-          ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(dp.sx, dp.sy, 4 + 4 * pulse, 0, Math.PI * 2); ctx.fill();
-          ctx.fillStyle = rgb(P.ping, 0.9 * (df - 0.5) * 2); ctx.beginPath(); ctx.arc(dp.sx, dp.sy, 1.9, 0, Math.PI * 2); ctx.fill();
-        }
-      }
+        ctx.beginPath(); ctx.arc(p.x, p.y, 6.5, 0, Math.PI * 2);
+        ctx.strokeStyle = P.padRing; ctx.lineWidth = 1.3; ctx.stroke();
+        ctx.beginPath(); ctx.arc(p.x, p.y, 2.6, 0, Math.PI * 2);
+        ctx.fillStyle = k > 0 ? P.padDot : P.via; ctx.fill();
+      });
 
-      // --- Techordia home base (Alameda) ---
-      var hf = (hp.z + 1) / 2;
-      if (hf > 0.42) {
-        if (!reduce) {
-          var rp = (now / 1700) % 1;
-          ctx.beginPath(); ctx.arc(hp.sx, hp.sy, nodeR * 0.6 + rp * nodeR * 3, 0, Math.PI * 2);
-          ctx.strokeStyle = "rgba(" + P.core + "," + (0.45 * (1 - rp) * (hf - 0.4)).toFixed(3) + ")"; ctx.lineWidth = 1.4; ctx.stroke();
+      // travelling signals with fading tails
+      pulses.forEach(function (pu) {
+        var col = pu.out ? P.out : P.inn;
+        var head = pointAt(pu.tr, pu.out ? pu.t : 1 - pu.t);
+        for (var k = 1; k <= 4; k++) {
+          var bt = pu.t - k * (7 / pu.tr.L);
+          if (bt < 0) break;
+          var bp = pointAt(pu.tr, pu.out ? bt : 1 - bt);
+          ctx.beginPath(); ctx.arc(bp.x, bp.y, 2.1 - k * 0.35, 0, Math.PI * 2);
+          ctx.fillStyle = rgb(col, (0.55 - k * 0.12).toFixed(2)); ctx.fill();
         }
-        var cg = ctx.createRadialGradient(hp.sx, hp.sy, 0, hp.sx, hp.sy, nodeR * 2.8);
-        cg.addColorStop(0, "rgba(" + P.core + "," + (0.7 * hf).toFixed(2) + ")"); cg.addColorStop(1, "rgba(" + P.core + ",0)");
-        ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(hp.sx, hp.sy, nodeR * 2.8, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.fillStyle = "rgba(" + P.core + ",0.98)"; ctx.arc(hp.sx, hp.sy, nodeR, 0, Math.PI * 2); ctx.fill();
-        glyph(ICON.hub, hp.sx, hp.sy, nodeR * 1.4, P.coreGlyph);
-        // label pill
-        var lbl = "TECHORDIA · ALAMEDA";
-        ctx.font = "700 " + (fs * 0.86).toFixed(1) + "px 'Space Grotesk', system-ui, sans-serif";
-        ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        var lw = ctx.measureText(lbl).width, ph = fs + 8, py = hp.sy + nodeR + ph * 0.85;
-        ctx.globalAlpha = Math.min(1, (hf - 0.42) * 4);
-        ctx.fillStyle = P.pillBg; rrect(hp.sx - lw / 2 - 9, py - ph / 2, lw + 18, ph, ph / 2); ctx.fill();
-        ctx.fillStyle = P.pillTx; ctx.fillText(lbl, hp.sx, py + 0.5);
-        ctx.globalAlpha = 1;
-      }
+        var hg = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 9);
+        hg.addColorStop(0, rgb(col, 0.55)); hg.addColorStop(1, rgb(col, 0));
+        ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(head.x, head.y, 9, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = rgb(col, 0.95); ctx.beginPath(); ctx.arc(head.x, head.y, 2.4, 0, Math.PI * 2); ctx.fill();
+      });
+
+      // the Techordia chip: pins, body, inner frame, glyph + wordmark
+      ctx.fillStyle = P.pin;
+      TRACES.forEach(function (tr) {
+        var p0 = tr.pts[0], p1 = tr.pts[1];
+        var hx = p1[0] === p0[0] ? 0 : (p1[0] > p0[0] ? 1 : -1), hy = p1[1] === p0[1] ? 0 : (p1[1] > p0[1] ? 1 : -1);
+        if (hx) ctx.fillRect(p0[0] - (hx < 0 ? 9 : 0), p0[1] - 2.5, 9, 5);
+        else ctx.fillRect(p0[0] - 2.5, p0[1] - (hy < 0 ? 9 : 0), 5, 9);
+      });
+      var body = ctx.createLinearGradient(CXC - CHIP, CXC - CHIP, CXC + CHIP, CXC + CHIP);
+      body.addColorStop(0, P.chipA); body.addColorStop(1, P.chipB);
+      rrect(CXC - CHIP, CXC - CHIP, CHIP * 2, CHIP * 2, CR);
+      ctx.fillStyle = body; ctx.fill();
+      ctx.strokeStyle = P.chipEdge; ctx.lineWidth = 1.5; ctx.stroke();
+      rrect(CXC - CHIP + 9, CXC - CHIP + 9, CHIP * 2 - 18, CHIP * 2 - 18, CR - 8);
+      ctx.strokeStyle = P.chipInner; ctx.lineWidth = 1; ctx.stroke();
+      glyph(ICON.hub, CXC, CXC - 18, 30, P.glyphC);
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.font = "700 14.5px 'Space Grotesk', system-ui, sans-serif";
+      ctx.fillStyle = P.label; ctx.fillText("TECHORDIA", CXC, CXC + 14);
+      ctx.font = "600 8.5px 'Space Grotesk', system-ui, sans-serif";
+      try { ctx.letterSpacing = "2.5px"; } catch (e) {}
+      ctx.fillStyle = P.sub; ctx.fillText("IT HANDLED", CXC + 1, CXC + 32);
+      try { ctx.letterSpacing = "0px"; } catch (e) {}
+
+      // corner brackets, breathing slowly — the "we're watching" frame
+      var ba = 0.55 + (reduce ? 0 : 0.3 * Math.sin(now / 1500));
+      ctx.strokeStyle = P.bracket; ctx.lineWidth = 2; ctx.globalAlpha = ba;
+      var B = CHIP + 16, K = 13;
+      [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(function (c) {
+        var x = CXC + c[0] * B, y = CXC + c[1] * B;
+        ctx.beginPath(); ctx.moveTo(x - c[0] * K, y); ctx.lineTo(x, y); ctx.lineTo(x, y - c[1] * K); ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+
+      // status chips: fade in, drift up, fade out
+      chips.forEach(function (c) {
+        var age = now - c.t0;
+        var a = Math.min(1, age / 250) * Math.min(1, Math.max(0, (c.life - age) / 400));
+        pill(c.x, c.y - 6 * (age / c.life), c.icon, c.text, a);
+      });
     }
 
-    var raf = null, running = false;
+    function step(now, dt) {
+      if (now - lastSpawn > 620 && pulses.length < 7) { lastSpawn = now; spawn(0); }
+      for (var i = pulses.length - 1; i >= 0; i--) {
+        var pu = pulses[i];
+        pu.t += (dt * SPEED / 1000) / pu.tr.L;
+        if (pu.t >= 1) {
+          if (pu.out) {
+            pu.tr.pad.flash = now;
+            if (now - lastChip > 1700 && chips.length < 2) {
+              lastChip = now;
+              var m = MSGS[msgIdx++ % MSGS.length], p = pu.tr.pad;
+              chips.push({ x: p.x, y: p.y < 130 ? p.y + 28 : p.y - 24, icon: m[0], text: m[1], t0: now, life: 3200 });
+            }
+          } else coreFlash = now;
+          pulses.splice(i, 1);
+        }
+      }
+      for (var j = chips.length - 1; j >= 0; j--) if (now - chips[j].t0 > chips[j].life) chips.splice(j, 1);
+    }
+
+    var raf = null, running = false, prev = 0;
     function frame(now) {
-      ang = ANG0 + 0.22 * Math.sin(now / 9000);   // gentle sway, keeps Alameda framed
-      curX += (tiltX - curX) * .06; curY += (tiltY - curY) * .06;
-      draw(now || 0);
+      var dt = Math.min(50, prev ? now - prev : 16); prev = now;
+      curX += (tiltX - curX) * .07; curY += (tiltY - curY) * .07;
+      step(now, dt);
+      draw(now);
       if (!reduce && !document.hidden) { running = true; raf = requestAnimationFrame(frame); }
       else { running = false; raf = null; }
     }
-    function startLoop() { if (!running && !reduce && !document.hidden) { running = true; raf = requestAnimationFrame(frame); } }
+    function startLoop() { if (!running && !reduce && !document.hidden) { prev = 0; running = true; raf = requestAnimationFrame(frame); } }
+
+    resize();
+    if (window.ResizeObserver) { try { new ResizeObserver(resize).observe(box); } catch (e) {} }
+    else window.addEventListener("resize", resize);
     try {
-      new MutationObserver(function () { setPalette(); draw(performance.now ? performance.now() : 0); })
+      new MutationObserver(function () { setPalette(); if (!raf) draw(lastNow); })
         .observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     } catch (e) {}
-    draw(0);                                  // always paint one static frame, even if hidden/backgrounded
-    if (!reduce) {
-      document.addEventListener("visibilitychange", startLoop);
-      startLoop();
+
+    if (reduce) {
+      // static composition: a few signals mid-flight and two finished jobs
+      [[0, 0.62, true], [4, 0.4, false], [8, 0.78, true], [10, 0.5, false]].forEach(function (s) {
+        pulses.push({ tr: TRACES[s[0]], t: s[1], out: s[2] });
+      });
+      chips.push({ x: TRACES[0].pad.x, y: TRACES[0].pad.y - 24, icon: MSGS[0][0], text: MSGS[0][1], t0: 0, life: 1e9 });
+      chips.push({ x: TRACES[9].pad.x, y: TRACES[9].pad.y - 24, icon: MSGS[1][0], text: MSGS[1][1], t0: 0, life: 1e9 });
+      draw(0);
+      return;
     }
+    // pre-seed so the board is alive on first paint
+    spawn(0.55); spawn(0.3); spawn(0.1);
+    lastChip = -1e9;
+    draw(0);
+    document.addEventListener("visibilitychange", startLoop);
+    startLoop();
   }
 
   /* ---- hover cross-highlight between hub & nodes ---- */
