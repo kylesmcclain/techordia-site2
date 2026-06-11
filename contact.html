@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Contact Techordia | Talk to a Real Person</title>
-<meta name="description" content="Talk to Techordia about your IT, or call 877-925-4785. A real person picks up, and the consultation is free. Based in Alameda, serving the Bay Area." />
+<title>Contact Techordia | Talk to an Engineer</title>
+<meta name="description" content="Tell us what's going on with your IT. You'll get an honest read, not a pitch. Free consultation — call 877-925-4785 or send the form." />
 <link rel="canonical" href="https://kylesmcclain.github.io/techordia-site2/contact.html" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Techordia" />
-<meta property="og:title" content="Contact Techordia | Talk to a Real Person" />
-<meta property="og:description" content="Talk to Techordia about your IT, or call 877-925-4785. A real person picks up, and the consultation is free. Based in Alameda, serving the Bay Area." />
+<meta property="og:title" content="Contact Techordia | Talk to an Engineer" />
+<meta property="og:description" content="Tell us what's going on with your IT. You'll get an honest read, not a pitch. Free consultation — call 877-925-4785 or send the form." />
 <meta property="og:url" content="https://kylesmcclain.github.io/techordia-site2/contact.html" />
 <meta property="og:image" content="https://kylesmcclain.github.io/techordia-site2/assets/img/logo.png" />
 <meta name="twitter:card" content="summary" />
-<meta name="twitter:title" content="Contact Techordia | Talk to a Real Person" />
-<meta name="twitter:description" content="Talk to Techordia about your IT, or call 877-925-4785. A real person picks up, and the consultation is free. Based in Alameda, serving the Bay Area." />
+<meta name="twitter:title" content="Contact Techordia | Talk to an Engineer" />
+<meta name="twitter:description" content="Tell us what's going on with your IT. You'll get an honest read, not a pitch. Free consultation — call 877-925-4785 or send the form." />
 <meta name="twitter:image" content="https://kylesmcclain.github.io/techordia-site2/assets/img/logo.png" />
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
 <link rel="icon" href="assets/img/favicon.ico" sizes="32x32" />
@@ -22,13 +22,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="assets/css/app.css?v=20260611-1" />
-<link rel="stylesheet" href="assets/css/effects.css?v=20260611-1" />
+<link rel="stylesheet" href="assets/css/app.css?v=20260611-2" />
+<link rel="stylesheet" href="assets/css/effects.css?v=20260611-2" />
 </head>
 <body>
 <header class="masthead">
   <div class="wrap masthead__row">
-    <a class="brand" href="index.html" aria-label="Techordia home"><img src="assets/img/logo.png?v=20260611-1" alt="Techordia" /></a>
+    <a class="brand" href="index.html" aria-label="Techordia home"><img src="assets/img/logo.png?v=20260611-2" alt="Techordia" /></a>
     <nav class="mainnav" aria-label="Primary">
       <a href="index.html">Home</a>
       <div class="navitem">
@@ -46,6 +46,7 @@
       </div>
       <a href="techordia-way.html">The Techordia Way</a>
       <a href="contact.html" class="is-active">Contact</a>
+      <a href="https://connect.techordia.com" class="is-portal" target="_blank" rel="noopener">Client Support</a>
     </nav>
     <div class="header-cta">
       <a href="tel:8779254785" class="textlink nowrap">877·925·4785</a>
@@ -59,21 +60,27 @@
 <section class="pagehero">
   <div class="hero__glow" aria-hidden="true"></div>
   <div class="hero__grid-bg" aria-hidden="true"></div>
-  <div class="wrap pagehero__inner ph-narrow">
-    <p class="breadcrumb"><a href="index.html">Home</a> / Contact</p>
-    <p class="eyebrow">Get in touch</p>
-    <h1>Let's talk about your IT</h1>
-    <p class="lede">Tell us what's going on and we'll give you an honest read on where things stand. The consultation is free, and nobody here works from a script.</p>
+  <div class="wrap pagehero__inner ph-2col">
+    <div>
+      <p class="breadcrumb"><a href="index.html">Home</a> / Contact</p>
+      <p class="eyebrow">Get in touch</p>
+      <h1>Talk to an engineer</h1>
+      <p class="lede">Tell us what's going on. You'll get an honest read, not a pitch — and the consultation is free.</p>
+    </div>
+    <div>
+      <div class="fx" data-fx="response" data-label="You call, and a Techordia engineer answers — signals flow both ways between you and the team"></div>
+      <p class="fx-caption">You call. An engineer answers.</p>
+    </div>
   </div>
 </section>
 
 <section class="section">
   <div class="wrap">
-    <div class="contact-narrow">
+    <div class="contact">
       <div class="panel--light card reveal form-card">
-        <h3 style="margin-top:0">Request your consultation</h3>
-        <p style="color:var(--slate-mute);margin-top:0">Tell us a little about your business and we&rsquo;ll be in touch to schedule.</p>
-        <form id="review-form" class="form" action="https://api.web3forms.com/submit" method="POST" novalidate>
+        <h3 style="margin-top:0">Book your free consultation</h3>
+        <p style="color:var(--slate-mute);margin-top:0">A little about your business, and we&rsquo;ll get back to you to schedule.</p>
+        <form id="contact-form" class="form" action="https://api.web3forms.com/submit" method="POST" novalidate>
           <input type="hidden" name="access_key" value="2966d2b3-a102-4efe-82bd-7355a2a27027" />
           <input type="hidden" name="subject" value="New consultation request from techordia.com" />
           <input type="hidden" name="from_name" value="Techordia website" />
@@ -94,18 +101,21 @@
             </select>
           </div>
           <div class="field"><label for="message">What&rsquo;s going on with your IT?</label><textarea id="message" name="message" rows="4"></textarea></div>
-          <button type="submit" class="btn btn--primary btn--lg" style="justify-content:center">Request my consultation</button>
+          <button type="submit" class="btn btn--primary btn--lg" style="justify-content:center">Book my consultation</button>
           <p id="form-status" class="form-note" role="status" aria-live="polite"></p>
           <p class="form-note">Prefer to talk now? Call <a href="tel:8779254785">877&middot;925&middot;4785</a>.</p>
         </form>
       </div>
-      <div class="contact-meta reveal" data-d="1">
-        <ul class="ticks" style="margin-top:0">
-          <li>An honest read on where your IT stands today</li>
-          <li>The short list of things worth fixing first</li>
-          <li>A clear idea of what good support should cost</li>
-          <li>Zero obligation, whatever you decide</li>
-        </ul>
+      <div class="contact__aside reveal" data-d="1">
+        <div class="panel--light card">
+          <p class="svc__listhead">What you'll get</p>
+          <ul class="ticks">
+            <li>An honest read on where your IT stands</li>
+            <li>The short list worth fixing first</li>
+            <li>What good support should cost</li>
+            <li>Zero obligation, whatever you decide</li>
+          </ul>
+        </div>
         <div class="panel--light card">
           <div class="info-row">
             <span class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.4 11.4 0 0 0 .57 3.6 1 1 0 0 1-.25 1l-2.2 2.2Z"/></svg></span>
@@ -119,16 +129,9 @@
             <span class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.47-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13Zm1.78 13.02H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"/></svg></span>
             <div><strong>Connect</strong><a href="https://www.linkedin.com/company/techordia-llc" target="_blank" rel="noopener">Techordia on LinkedIn</a></div>
           </div>
-          <aside class="review-badge review-badge--contact" aria-label="Yelp review profile status">
-            <div class="google-summary__brand">
-              <span class="google-wordmark yelp-mark" aria-label="Yelp">Yelp</span>
-              <strong>Reviews</strong>
-            </div>
-            <div class="google-summary__score">
-              <strong>5.0</strong>
-              <span class="google-stars" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></span>
-            </div>
-            <a href="https://www.yelp.com/biz/techordia-alameda" target="_blank" rel="noopener">8 reviews on Yelp</a>
+          <aside class="yelp-badge" aria-label="Techordia Yelp rating">
+            <span class="yelp-badge__row"><span class="yelp-mark" aria-label="Yelp">Yelp</span> 5.0 <span class="reviews__stars" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></span></span>
+            <a href="https://www.yelp.com/biz/techordia-alameda" target="_blank" rel="noopener">Read our 8 reviews</a>
           </aside>
         </div>
       </div>
@@ -140,7 +143,7 @@
 <footer class="foot">
   <div class="wrap">
     <div class="foot__top">
-      <div><img src="assets/img/logo.png?v=20260611-1" alt="Techordia" /><p class="measure">IT support for Bay Area businesses, from a real local team. Based in Alameda, doing this since 2014.</p></div>
+      <div><img src="assets/img/logo.png?v=20260611-2" alt="Techordia" /><p class="measure">Bay Area IT, handled by a real local team. Alameda, since 2010.</p></div>
       <div><h4>Services</h4><ul>
         <li><a href="managed-it.html">Managed IT</a></li>
         <li><a href="it-projects.html">IT Projects</a></li>
@@ -151,14 +154,14 @@
         <li><a href="managed-it.html#cameras">Cameras &amp; Door Access</a></li>
         <li><a href="managed-it.html#strategy">IT Strategy &amp; Consulting</a></li>
       </ul></div>
-      <div><h4>Company</h4><ul><li><a href="techordia-way.html">The Techordia Way</a></li><li><a href="services.html">How we work</a></li><li><a href="contact.html">Contact</a></li></ul></div>
-      <div><h4>Talk to us</h4><ul><li><a href="tel:8779254785">877·925·4785</a></li><li><a href="contact.html">Book a free consultation</a></li><li>Alameda, California</li><li><a href="https://www.linkedin.com/company/techordia-llc" target="_blank" rel="noopener">LinkedIn</a></li></ul></div>
+      <div><h4>Company</h4><ul><li><a href="techordia-way.html">The Techordia Way</a></li><li><a href="services.html">How we work</a></li><li><a href="contact.html">Contact</a></li><li><a href="https://connect.techordia.com" target="_blank" rel="noopener">Client Support</a></li></ul></div>
+      <div><h4>Talk to us</h4><ul><li><a href="tel:8779254785">877·925·4785</a></li><li><a href="contact.html">Book a free consultation</a></li><li>Alameda, California</li><li><a href="https://www.linkedin.com/company/techordia-llc" target="_blank" rel="noopener">LinkedIn</a></li><li><a href="https://www.yelp.com/biz/techordia-alameda" target="_blank" rel="noopener">5.0 on Yelp</a></li></ul></div>
     </div>
-    <div class="foot__bottom"><span>© <span id="yr">2026</span> Techordia. All rights reserved.</span><span>Less worrying about IT. More running your business.</span></div>
+    <div class="foot__bottom"><span>© <span id="yr">2026</span> Techordia. All rights reserved.</span><span>Founded 2010. Still answering the phone.</span></div>
   </div>
 </footer>
 
-<script src="assets/js/effects.js?v=20260611-1" defer></script>
-<script src="assets/js/site.js?v=20260611-1" defer></script>
+<script src="assets/js/effects.js?v=20260611-2" defer></script>
+<script src="assets/js/site.js?v=20260611-2" defer></script>
 </body>
 </html>

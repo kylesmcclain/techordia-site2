@@ -125,138 +125,25 @@
   var y = document.getElementById("yr");
   if (y) y.textContent = new Date().getFullYear();
 
-  // Yelp review drawer and carousel
-  var yelpReviewsUrl = "https://www.yelp.com/biz/techordia-alameda";
-  var reviewData = [
-    {
-      initials: "MG",
-      tone: "pink",
-      name: "Marlene G.",
-      meta: "Yelp · Jun 2025",
-      quote: "If there were 10 stars I'd give them all. I was locked out of my email for days, and as an attorney that was hugely disruptive. Techordia were immediately available, knowledgeable, and calm under pressure.",
-      url: yelpReviewsUrl
-    },
-    {
-      initials: "AB",
-      tone: "orange",
-      name: "Andy B.",
-      meta: "Yelp · Jun 2024",
-      quote: "Ben, Wilson and the team have provided outstanding IT services across the 9 years I've worked with them. Anybody looking for a new IT MSP, look no further.",
-      url: yelpReviewsUrl
-    },
-    {
-      initials: "KK",
-      tone: "purple",
-      name: "Kristin K.",
-      meta: "Yelp · Jul 2023",
-      quote: "We've worked with Techordia for over 5 years. They manage our IT daily and have run multiple large-scale projects. Professional, knowledgeable, and highly recommended.",
-      url: yelpReviewsUrl
-    },
-    {
-      initials: "DR",
-      tone: "green",
-      name: "Darcy R.",
-      meta: "Yelp · Jul 2023",
-      quote: "Best IT company to work with. Very efficient and knowledgeable, quick to respond, and very friendly. Would highly recommend them.",
-      url: yelpReviewsUrl
-    },
-    {
-      initials: "VW",
-      tone: "blue",
-      name: "Vicki W.",
-      meta: "Yelp · Oct 2013",
-      quote: "The highest rating for service, professionalism, technical knowledge, and integrity. We've partnered with Techordia since 2010 and have never been disappointed.",
-      url: yelpReviewsUrl
-    }
-  ];
-  var googleWordmark = '<span class="google-wordmark yelp-mark" aria-label="Yelp">Yelp</span>';
-  var stars = '<span class="google-stars" aria-label="5 out of 5 stars"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></span>';
-
-  function reviewCardMarkup(item, drawer) {
-    var avatar = '<span class="review-avatar review-avatar--' + item.tone + '">' + item.initials + '</span>';
-    if (drawer) {
-      return '<article class="google-review-drawer__card">' +
-        '<div class="google-review-drawer__person">' + avatar +
-        '<span><strong>' + item.name + '<span class="review-check" aria-label="Verified source"></span></strong><small>' + item.meta + '</small></span></div>' +
-        stars +
-        '<p class="google-review-card__quote">' + item.quote + '</p>' +
-        '<a class="google-review-card__more" href="' + item.url + '" target="_blank" rel="noopener">Read more</a>' +
-        '</article>';
-    }
-    return "";
-  }
-
-  function openReviewDrawer() {
-    document.body.classList.add("reviews-open");
-    var drawer = document.querySelector(".google-review-drawer");
-    if (drawer) drawer.focus();
-  }
-
-  function closeReviewDrawer() {
-    document.body.classList.remove("reviews-open");
-  }
-
-  function mountReviewWidget() {
-    if (document.querySelector(".google-float__button")) return;
-    var shell = document.createElement("div");
-    shell.className = "google-review-widget";
-    shell.innerHTML =
-      '<button class="google-float__button" type="button" aria-label="Open Techordia Yelp reviews">' +
-        googleWordmark +
-        '<span class="google-float__rating"><strong>5.0</strong>' + stars + '</span>' +
-        '<span class="google-float__count">8 reviews</span>' +
-      '</button>' +
-      '<div class="google-review-backdrop" aria-hidden="true"></div>' +
-      '<button class="google-review-close" type="button" aria-label="Close reviews">&times;</button>' +
-      '<aside class="google-review-drawer" tabindex="-1" aria-label="Techordia reviews panel">' +
-        '<div class="google-review-drawer__summary">' +
-          '<div class="google-summary__score"><strong>5.0</strong>' + stars + '</div>' +
-          '<div class="google-review-drawer__count">8 reviews on ' + googleWordmark + '</div>' +
-        '</div>' +
-        reviewData.map(function (item) { return reviewCardMarkup(item, true); }).join("") +
-      '</aside>';
-    document.body.appendChild(shell);
-
-    shell.querySelector(".google-float__button").addEventListener("click", openReviewDrawer);
-    shell.querySelector(".google-review-backdrop").addEventListener("click", closeReviewDrawer);
-    shell.querySelector(".google-review-close").addEventListener("click", closeReviewDrawer);
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") closeReviewDrawer();
-    });
-  }
-
+  // reviews carousel (homepage section)
   function wireReviewCarousel() {
     var carousel = document.querySelector("[data-review-carousel]");
     if (!carousel) return;
-    var track = carousel.querySelector(".google-review-track");
-    var prev = carousel.querySelector(".review-arrow--prev");
-    var next = carousel.querySelector(".review-arrow--next");
+    var track = carousel.querySelector(".reviews__track");
+    var prev = carousel.querySelector(".reviews__arrow--prev");
+    var next = carousel.querySelector(".reviews__arrow--next");
     if (!track || !prev || !next) return;
     function step() {
-      var card = track.querySelector(".google-review-card");
+      var card = track.querySelector(".review-card");
       return card ? card.getBoundingClientRect().width + 20 : track.clientWidth;
     }
     prev.addEventListener("click", function () { track.scrollLeft -= step(); });
     next.addEventListener("click", function () { track.scrollLeft += step(); });
   }
-
-  function wireReviewSectionVisibility() {
-    var section = document.querySelector(".google-review-section");
-    if (!section || typeof window.IntersectionObserver !== "function") return;
-    var sectionObserver = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        document.body.classList.toggle("review-section-active", entry.isIntersecting);
-      });
-    }, { threshold: 0.12 });
-    sectionObserver.observe(section);
-  }
-
-  mountReviewWidget();
   wireReviewCarousel();
-  wireReviewSectionVisibility();
 
   // contact form: submits to Web3Forms (free), which emails kyle.mcclain@techordia.com
-  var form = document.getElementById("review-form");
+  var form = document.getElementById("contact-form");
   if (form) {
     var endpoint = "https://api.web3forms.com/submit";
     form.addEventListener("submit", function (e) {

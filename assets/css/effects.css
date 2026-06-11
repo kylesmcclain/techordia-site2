@@ -1,7 +1,7 @@
 /* =========================================================================
    Techordia — ONE effect system ("operating network")
    Every page uses the same node/edge/motion language; only the LAYOUT mode
-   changes (network, ownership, lanes, layers, timeline, selector, framework).
+   changes (core, lanes, timeline, selector, orbit, response).
    ========================================================================= */
 
 .fx {
@@ -11,7 +11,8 @@
 }
 .fx svg { width: 100%; height: 100%; overflow: visible; display: block; }
 .fx[data-fx="lanes"], .fx[data-fx="timeline"] { aspect-ratio: 16 / 10; }
-.fx[data-fx="selector"], .fx[data-fx="framework"], .fx[data-fx="core"] { aspect-ratio: 1 / 1; }
+.fx[data-fx="response"] { aspect-ratio: 16 / 10; }
+.fx[data-fx="selector"], .fx[data-fx="orbit"], .fx[data-fx="core"] { aspect-ratio: 1 / 1; }
 
 /* command core hero (canvas) */
 .fx-core { display: block; width: 100%; height: 100%; }
@@ -32,6 +33,7 @@
   fill: none; stroke: url(#fxFlow); stroke-width: 2; stroke-linecap: round;
   stroke-dasharray: 3 16; opacity: .9; animation: fxflow 2.6s linear infinite;
 }
+.fx-flow--rev { animation-direction: reverse; stroke: #6fe3da; }
 @keyframes fxflow { to { stroke-dashoffset: -38; } }
 
 .fx-node { cursor: default; }
@@ -59,16 +61,7 @@
 .fx.is-engaged .fx-edge:not(.is-hot) { opacity: .12; }
 .fx-node, .fx-edge { transition: opacity .3s; }
 
-/* pulse rings (ownership / layers) */
-.fx-pulse { fill: none; stroke: #2f7bf6; opacity: 0; transform-box: fill-box; transform-origin: center; animation: fxpulse 3.4s ease-out infinite; }
-@keyframes fxpulse { 0% { opacity: .5; transform: scale(.4); } 70% { opacity: 0; transform: scale(1.25); } 100% { opacity: 0; } }
-
-/* radar sweep (cybersecurity) */
-.fx-radar { transform-box: fill-box; transform-origin: center; animation: fxspin 7s linear infinite; }
-@keyframes fxspin { to { transform: rotate(360deg); } }
-.fx-scanline { stroke: #58e0d6; stroke-width: 1; opacity: .5; }
-
-/* lane packets (co-managed) — set path via offset-path inline */
+/* lane packets — set path via offset-path inline */
 .fx-packet { fill: #6fe3da; r: 3.2; offset-rotate: 0deg; animation: fxpacket var(--pdur, 4s) linear var(--pdel, 0s) infinite; }
 @keyframes fxpacket { 0% { offset-distance: 0%; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { offset-distance: 100%; opacity: 0; } }
 
@@ -78,13 +71,9 @@
 @keyframes fxgrow { 0% { stroke-dashoffset: var(--len); } 60%,100% { stroke-dashoffset: 0; } }
 .fx-runner { fill: #6fe3da; r: 5; animation: fxrun 5s cubic-bezier(.6,.05,.2,1) infinite; }
 
-/* framework rotation (techordia way placeholder) */
+/* orbit ring rotation (techordia way) */
+@keyframes fxspin { to { transform: rotate(360deg); } }
 .fx-orbit { transform-box: fill-box; transform-origin: center; animation: fxspin 26s linear infinite; }
-.fx-orbit--rev { animation-duration: 34s; animation-direction: reverse; }
-
-/* badge over placeholder */
-.fx-soon { fill: #0b1626; stroke: var(--hairline-strong); }
-.fx-soon-t { font-family: var(--font-display); font-weight: 600; fill: #9fd9ff; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
 
 [data-theme="light"] .fx-edge { opacity: .62; }
 [data-theme="light"] .fx-edge--soft { opacity: .38; }
@@ -102,14 +91,9 @@
 [data-theme="light"] .fx-sub { fill: #5f728c; }
 [data-theme="light"] .fx-cap { fill: #166bb8; }
 [data-theme="light"] .fx-node.is-hot .fx-label { fill: #0d1b2e; }
-[data-theme="light"] .fx-soon {
-  fill: rgba(255,255,255,.88);
-  stroke: rgba(47,123,246,.24);
-}
-[data-theme="light"] .fx-soon-t { fill: #166bb8; }
 
 @media (prefers-reduced-motion: reduce) {
-  .fx-flow, .fx-bob, .fx-pulse, .fx-radar, .fx-packet, .fx-progress, .fx-runner, .fx-orbit { animation: none !important; }
+  .fx-flow, .fx-bob, .fx-packet, .fx-progress, .fx-runner, .fx-orbit { animation: none !important; }
   .fx-progress { stroke-dashoffset: 0; }
   .fx-flow { opacity: .6; }
 }

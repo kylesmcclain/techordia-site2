@@ -1,10 +1,8 @@
-# Techordia — marketing site (STAGING)
+# Techordia — marketing site
 
-Staging build of the Techordia marketing site. **Do not treat as production.**
-Review here, then promote to the production repo once approved.
+Static marketing site for Techordia, served via GitHub Pages.
 
-- **Staging URL:** https://kylesmcclain.github.io/techordia-site-staging/
-- **Production (when approved):** https://kylesmcclain.github.io/techordia-site/
+- **Live URL:** https://kylesmcclain.github.io/techordia-site2/
 
 ## One effect system
 
@@ -13,23 +11,22 @@ edges, and motion — expressed in different layout *modes*:
 
 | Page | Mode | What it communicates |
 |------|------|----------------------|
-| Home | `network` | Techordia as the IT operating center, connected to every domain |
+| Home | `core` | The Techordia command core: a circuit board where requests flow in, fixes flow out, and live status chips pop as work completes |
 | Services | `selector` | Interactive model selector (hover a card → its path lights up) |
-| Managed IT | `ownership` | Techordia owns the whole operating surface (managed boundary) |
-| Co-Managed IT | `lanes` | Two lanes (your IT / Techordia) meeting at a shared layer |
-| Cybersecurity | `layers` | Concentric control layers + radar around a protected core |
+| Managed IT | `lanes` | Every layer of a client's IT connecting through Techordia as one accountable owner |
 | IT Projects | `timeline` | Staged delivery: scope → prepare → cutover → test → handoff |
-| The Techordia Way | `framework` | Placeholder — full framework "coming soon" |
+| The Techordia Way | `orbit` | The six Way qualities orbiting the Techordia hub |
+| Contact | `response` | You call, an engineer answers — signals flowing both ways |
 
 Motion is purposeful: subtle mouse parallax (depth), edge flow, hover
 cross-highlighting, and restrained scroll reveals. All animation respects
-`prefers-reduced-motion`.
+`prefers-reduced-motion`. Everything is hand-authored — no effect libraries.
 
-## Anti-"AI slop" choices
+## Design system
 
-Space Grotesk + Manrope (not Inter), asymmetric/editorial layouts (heroes are
-composed differently per page), varied corner radii, and a single restrained
-blue→teal accent.
+Space Grotesk + Manrope, asymmetric/editorial layouts (heroes are composed
+differently per page), varied corner radii, and a single restrained
+blue→teal accent. Light/dark theme toggle persisted in localStorage.
 
 ## Stack
 
@@ -37,20 +34,20 @@ Hand-built static HTML/CSS/vanilla JS — no framework, no build step — so it 
 cleanly to GitHub Pages' multi-URL structure.
 
 ```
-index.html  services.html  managed-it.html  co-managed-it.html
-cybersecurity.html  it-projects.html  techordia-way.html  contact.html  404.html
+index.html  services.html  managed-it.html  it-projects.html
+techordia-way.html  contact.html  404.html
 assets/css/{app,effects}.css   assets/js/{site,effects}.js   assets/img/*
 ```
+
+## Notes
+
+- Contact form submits via Web3Forms.
+- Client portal for existing customers: https://connect.techordia.com
+  (linked in the header and footer).
+- Founded 2010 — all copy and metadata reflect this.
 
 ## Local preview
 
 ```bash
 python -m http.server 4178   # then open http://localhost:4178/
 ```
-
-## Known follow-ups (publish checklist)
-
-- Contact form is front-end only — wire to a form service/backend to capture leads.
-- The Techordia Way is a placeholder pending final framework content.
-- Add analytics + verified review data (or omit any rating widget).
-- Mobile QA + cross-browser pass (desktop is locked first, per plan).
